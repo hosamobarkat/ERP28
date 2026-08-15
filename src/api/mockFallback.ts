@@ -385,9 +385,17 @@ export function getLocalDB(): LocalDB {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
       return initial;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed.looms || parsed.looms.length === 0 || !parsed.halls || parsed.halls.length === 0) {
+      const initial = getInitialData();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      return initial;
+    }
+    return parsed;
   } catch {
-    return getInitialData();
+    const initial = getInitialData();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    return initial;
   }
 }
 
@@ -791,7 +799,21 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
     return db.auditLogs;
   }
 
+  // Change Password
+  if (endpoint === '/api/auth/change-password' && method === 'POST') {
+    const { currentPassword, newPassword } = body;
+    if (!currentPassword || !newPassword) throw new Error('يرجى ملء جميع الحقول');
+    if (currentPassword !== '123789') throw new Error('كلمة المرور الحالية غير صحيحة');
+    return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
+  }
+
   // Settings
+  if (endpoint === '/api/settings/reset-demo' && method === 'POST') {
+    const initial = getInitialData();
+    saveLocalDB(initial);
+    return { success: true, message: 'تمت استعادة البيانات التجريبية بنجاح' };
+  }
+
   if (endpoint === '/api/settings') {
     if (method === 'GET') return db.settings;
     if (method === 'PUT') {
