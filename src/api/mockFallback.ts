@@ -4,7 +4,7 @@ import {
   EfficiencyCalculator,
 } from '../businessLogic/calculators';
 
-const STORAGE_KEY = 'weaving_erp_client_db_v2';
+const STORAGE_KEY = 'weaving_erp_client_db_v3';
 
 interface LocalDB {
   users: User[];
@@ -69,7 +69,7 @@ const getInitialData = (): LocalDB => {
       description: 'صالة متخصصة لإنتاج أقمشة الغابردين (42 نول بيكانول اوبتي ماكس 2017)',
       totalLoomsCount: 42,
       status: 'active',
-      notes: '42 نول Picanol OptiMax-i 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
+      notes: '42 نول Picanol OptiMax-i-4-R 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
       createdAt: new Date().toISOString(),
     },
     {
@@ -79,7 +79,7 @@ const getInitialData = (): LocalDB => {
       description: 'صالة متخصصة لإنتاج أقمشة الدنيم والجينز (54 نول بيكانول اوبتي ماكس 2017)',
       totalLoomsCount: 54,
       status: 'active',
-      notes: '54 نول Picanol OptiMax-i 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
+      notes: '54 نول Picanol OptiMax-i-4-R 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
       createdAt: new Date().toISOString(),
     },
   ];
@@ -90,7 +90,7 @@ const getInitialData = (): LocalDB => {
       hallId: 'hall-1',
       hallName: 'صالة النسيج الخامي',
       name: 'المجموعة A (أنوال الغابردين 1 - 21)',
-      description: '21 نول Picanol OptiMax 2017 - 220cm',
+      description: '21 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 21,
       createdAt: new Date().toISOString(),
     },
@@ -99,7 +99,7 @@ const getInitialData = (): LocalDB => {
       hallId: 'hall-1',
       hallName: 'صالة النسيج الخامي',
       name: 'المجموعة B (أنوال الغابردين 22 - 42)',
-      description: '21 نول Picanol OptiMax 2017 - 220cm',
+      description: '21 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 21,
       createdAt: new Date().toISOString(),
     },
@@ -108,7 +108,7 @@ const getInitialData = (): LocalDB => {
       hallId: 'hall-2',
       hallName: 'صالة الجينز',
       name: 'المجموعة C (أنوال الدنيم 43 - 70)',
-      description: '28 نول Picanol OptiMax 2017 - 220cm',
+      description: '28 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 28,
       createdAt: new Date().toISOString(),
     },
@@ -117,7 +117,7 @@ const getInitialData = (): LocalDB => {
       hallId: 'hall-2',
       hallName: 'صالة الجينز',
       name: 'المجموعة D (أنوال الدنيم 71 - 96)',
-      description: '26 نول Picanol OptiMax 2017 - 220cm',
+      description: '26 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 26,
       createdAt: new Date().toISOString(),
     },
@@ -127,7 +127,7 @@ const getInitialData = (): LocalDB => {
   for (let i = 1; i <= 96; i++) {
     const isHall1 = i <= 42;
     const loomNumStr = String(i);
-    const code = `NOL-${String(i).padStart(2, '0')}`;
+    const code = `PC-${String(i).padStart(2, '0')}`;
     let groupId = 'grp-1';
     let groupName = 'المجموعة A (أنوال الغابردين 1 - 21)';
 
@@ -172,7 +172,7 @@ const getInitialData = (): LocalDB => {
       groupId,
       groupName,
       manufacturer: 'Picanol',
-      model: 'OptiMax-i 2017',
+      model: 'OptiMax-i-4-R 2017',
       year: 2017,
       rpm: isHall1 ? 560 : 540,
       picksPerCm: isHall1 ? 20 : 18,
@@ -541,25 +541,27 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
     if (method === 'POST') {
       const hall = db.halls.find((h) => h.id === body.hallId);
       const group = db.loomGroups.find((g) => g.id === body.groupId);
+      const numPadded = String(body.loomNumber).padStart(2, '0');
+      const finalCode = body.code || `PC-${numPadded}`;
       const newLoom: Loom = {
         id: `loom-${Date.now()}`,
         loomNumber: body.loomNumber,
-        code: body.code || `NOL-${body.loomNumber}`,
+        code: finalCode,
         hallId: body.hallId,
         hallName: hall ? hall.name : '',
         groupId: body.groupId || '',
         groupName: group ? group.name : '',
-        manufacturer: body.manufacturer,
-        model: body.model || '',
-        year: Number(body.year) || 2023,
-        rpm: Number(body.rpm) || 500,
+        manufacturer: body.manufacturer || 'Picanol',
+        model: body.model || 'OptiMax-i-4-R 2017',
+        year: Number(body.year) || 2017,
+        rpm: Number(body.rpm) || 550,
         picksPerCm: Number(body.picksPerCm) || 20,
         reedWidth: Number(body.reedWidth) || 220,
         fabricWidth: Number(body.fabricWidth) || 190,
         dailyOperatingHours: Number(body.dailyOperatingHours) || 24,
         shiftsCount: Number(body.shiftsCount) || 3,
-        defaultEfficiencyPercent: Number(body.defaultEfficiencyPercent) || 85,
-        status: body.status || 'stopped',
+        defaultEfficiencyPercent: Number(body.defaultEfficiencyPercent) || 88,
+        status: body.status || 'running',
         notes: body.notes || '',
         createdAt: new Date().toISOString(),
       };

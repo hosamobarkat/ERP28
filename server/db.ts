@@ -127,7 +127,7 @@ function createInitialSeedData(): DatabaseData {
       description: 'صالة متخصصة لإنتاج أقمشة الغابردين (42 نول بيكانول اوبتي ماكس 2017)',
       totalLoomsCount: 42,
       status: 'active',
-      notes: '42 نول Picanol OptiMax-i 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
+      notes: '42 نول Picanol OptiMax-i-4-R 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
       createdAt: new Date().toISOString(),
     },
     {
@@ -137,7 +137,7 @@ function createInitialSeedData(): DatabaseData {
       description: 'صالة متخصصة لإنتاج أقمشة الدنيم والجينز (54 نول بيكانول اوبتي ماكس 2017)',
       totalLoomsCount: 54,
       status: 'active',
-      notes: '54 نول Picanol OptiMax-i 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
+      notes: '54 نول Picanol OptiMax-i-4-R 2017 بعرض 220 سم - تعمل بـ 3 ورديات',
       createdAt: new Date().toISOString(),
     },
   ];
@@ -148,7 +148,7 @@ function createInitialSeedData(): DatabaseData {
       hallId: 'hall-1',
       hallName: 'صالة النسيج الخامي',
       name: 'المجموعة A (أنوال الغابردين 1 - 21)',
-      description: '21 نول Picanol OptiMax 2017 - 220cm',
+      description: '21 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 21,
       createdAt: new Date().toISOString(),
     },
@@ -157,7 +157,7 @@ function createInitialSeedData(): DatabaseData {
       hallId: 'hall-1',
       hallName: 'صالة النسيج الخامي',
       name: 'المجموعة B (أنوال الغابردين 22 - 42)',
-      description: '21 نول Picanol OptiMax 2017 - 220cm',
+      description: '21 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 21,
       createdAt: new Date().toISOString(),
     },
@@ -166,7 +166,7 @@ function createInitialSeedData(): DatabaseData {
       hallId: 'hall-2',
       hallName: 'صالة الجينز',
       name: 'المجموعة C (أنوال الدنيم 43 - 70)',
-      description: '28 نول Picanol OptiMax 2017 - 220cm',
+      description: '28 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 28,
       createdAt: new Date().toISOString(),
     },
@@ -175,18 +175,18 @@ function createInitialSeedData(): DatabaseData {
       hallId: 'hall-2',
       hallName: 'صالة الجينز',
       name: 'المجموعة D (أنوال الدنيم 71 - 96)',
-      description: '26 نول Picanol OptiMax 2017 - 220cm',
+      description: '26 نول Picanol OptiMax-i-4-R 2017 - 220cm',
       loomCount: 26,
       createdAt: new Date().toISOString(),
     },
   ];
 
-  // Generate 96 Looms (42 in Hall 1 Gabardine, 54 in Hall 2 Denim) - All Picanol OptiMax 2017
+  // Generate 96 Looms (42 in Hall 1 Gabardine, 54 in Hall 2 Denim) - All Picanol OptiMax-i-4-R 2017
   const looms: Loom[] = [];
   for (let i = 1; i <= 96; i++) {
     const isHall1 = i <= 42;
     const loomNumStr = String(i);
-    const code = `NOL-${String(i).padStart(2, '0')}`;
+    const code = `PC-${String(i).padStart(2, '0')}`;
     let groupId = 'grp-1';
     let groupName = 'المجموعة A (أنوال الغابردين 1 - 21)';
 
@@ -231,7 +231,7 @@ function createInitialSeedData(): DatabaseData {
       groupId,
       groupName,
       manufacturer: 'Picanol',
-      model: 'OptiMax-i 2017',
+      model: 'OptiMax-i-4-R 2017',
       year: 2017,
       rpm: isHall1 ? 560 : 540,
       picksPerCm: isHall1 ? 20 : 18,

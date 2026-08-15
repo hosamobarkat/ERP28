@@ -277,33 +277,36 @@ app.post('/api/looms', requireAuth, requireRole('manager', 'coordinator'), (req:
     notes,
   } = req.body;
 
-  if (!loomNumber || !hallId || !groupId || !rpm || !picksPerCm) {
-    return res.status(400).json({ error: 'يرجى إدخال الحقول الأساسية للنول (رقم النول، الصالة، المجموعة، RPM، وكثافة اللحمة)' });
+  if (!loomNumber || !hallId || !groupId) {
+    return res.status(400).json({ error: 'يرجى إدخال الحقول الأساسية للنول (رقم النول، الصالة، والمجموعة)' });
   }
 
   const db = loadDatabase();
   const hall = db.halls.find((h) => h.id === hallId);
   const group = db.loomGroups.find((g) => g.id === groupId);
 
+  const numPadded = String(loomNumber).padStart(2, '0');
+  const finalCode = code || `PC-${numPadded}`;
+
   const newLoom = {
     id: `loom-${Date.now()}`,
     loomNumber: String(loomNumber),
-    code: code || `NOL-${loomNumber}`,
+    code: finalCode,
     hallId,
     hallName: hall ? hall.name : '',
     groupId,
     groupName: group ? group.name : '',
-    manufacturer: manufacturer || '',
-    model: model || '',
-    year: Number(year) || undefined,
-    rpm: Number(rpm),
-    picksPerCm: Number(picksPerCm),
-    reedWidth: Number(reedWidth) || 200,
-    fabricWidth: Number(fabricWidth) || 180,
+    manufacturer: manufacturer || 'Picanol',
+    model: model || 'OptiMax-i-4-R 2017',
+    year: Number(year) || 2017,
+    rpm: Number(rpm) || 550,
+    picksPerCm: Number(picksPerCm) || 20,
+    reedWidth: Number(reedWidth) || 220,
+    fabricWidth: Number(fabricWidth) || 190,
     dailyOperatingHours: Number(dailyOperatingHours) || 24,
     shiftsCount: Number(shiftsCount) || 3,
-    defaultEfficiencyPercent: Number(defaultEfficiencyPercent) || 85,
-    status: status || 'stopped',
+    defaultEfficiencyPercent: Number(defaultEfficiencyPercent) || 88,
+    status: status || 'running',
     notes: notes || '',
     createdAt: new Date().toISOString(),
   };
