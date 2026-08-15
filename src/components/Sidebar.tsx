@@ -100,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Cpu className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="font-bold text-base text-white tracking-wide leading-tight">نظام النسيج ERP</h1>
+              <h1 className="font-bold text-base text-white tracking-wide leading-tight">نظام ادارة الانتاج</h1>
               <p className="text-xs text-slate-400 font-medium">إدارة ومراقبة الأنوال</p>
             </div>
           </div>

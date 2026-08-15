@@ -98,7 +98,7 @@ const MainAppContent: React.FC = () => {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white dir-rtl">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-slate-400">جاري تحميل نظام ERP قسم النسيج...</p>
+          <p className="text-sm font-semibold text-slate-400">جاري تحميل نظام ادارة الانتاج...</p>
         </div>
       </div>
     );

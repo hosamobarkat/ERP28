@@ -77,7 +77,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       case 'settings':
         return 'إعدادات النظام العامة';
       default:
-        return 'نظام إدارة إنتاج قسم النسيج';
+        return 'نظام ادارة الانتاج';
     }
   };
 

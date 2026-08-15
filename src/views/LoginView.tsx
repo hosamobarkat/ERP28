@@ -115,7 +115,7 @@ export const LoginView: React.FC = () => {
           <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-500 to-blue-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-3">
             <Cpu className="w-9 h-9 text-white animate-pulse" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-wide">نظام إدارة إنتاج قسم النسيج</h1>
+          <h1 className="text-2xl font-black text-white tracking-wide">نظام ادارة الانتاج</h1>
           <p className="text-xs text-slate-400 mt-1 font-medium">
             يرجى تحديد الشاغر الوظيفي ثم إدخال كلمة المرور للمتابعة
           </p>
