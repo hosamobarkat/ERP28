@@ -84,6 +84,8 @@ export interface FabricItem {
   weaveStructure: string; // التركيب النسيجي
   reedWidth: number; // عرض المشط cm
   fabricWidth: number; // عرض القماش cm
+  reedNumber?: number | string; // نمرة المشط (أسنان/سم أو رقم المشط)
+  endsPerDent?: number; // عدد الخيوط في البشرة / السن
   warpDensity: number; // كثافة السداء (خيوط/سم)
   totalWarpEnds?: number; // إجمالي عدد خيوط السداء الكلي
   weftDensity: number; // كثافة اللحمة (Picks/cm)

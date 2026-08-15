@@ -364,7 +364,7 @@ app.get('/api/fabric-items', requireAuth, (req: AuthRequest, res: Response) => {
 });
 
 app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator'), (req: AuthRequest, res: Response) => {
-  const { code, name, description, warpYarnCount, weftYarnCount, yarnType, weaveStructure, reedWidth, fabricWidth, warpDensity, totalWarpEnds, weftDensity, requiredRpm, notes } = req.body;
+  const { code, name, description, warpYarnCount, weftYarnCount, yarnType, weaveStructure, reedWidth, fabricWidth, reedNumber, endsPerDent, warpDensity, totalWarpEnds, weftDensity, requiredRpm, notes } = req.body;
 
   if (!code || !name || !weftDensity) {
     return res.status(400).json({ error: 'يرجى تزويد كود الصنف واسم الصنف وكثافة اللحمة Picks/cm' });
@@ -387,6 +387,8 @@ app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator')
     weaveStructure: weaveStructure || '',
     reedWidth: rWidth,
     fabricWidth: fWidth,
+    reedNumber: reedNumber ? (isNaN(Number(reedNumber)) ? reedNumber : Number(reedNumber)) : undefined,
+    endsPerDent: endsPerDent ? Number(endsPerDent) : undefined,
     warpDensity: wDensity,
     totalWarpEnds: ends,
     weftDensity: Number(weftDensity),

@@ -24,9 +24,11 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
   const [reedWidth, setReedWidth] = useState<number | ''>(220);
   const [fabricWidth, setFabricWidth] = useState<number | ''>(190);
   
-  // Warp inputs: either density or total ends (automatic calculation)
+  // Reed & Warp inputs
+  const [reedNumber, setReedNumber] = useState<number | ''>(16);
+  const [endsPerDent, setEndsPerDent] = useState<number | ''>(2);
   const [warpDensity, setWarpDensity] = useState<number | ''>(32);
-  const [totalWarpEnds, setTotalWarpEnds] = useState<number | ''>(6080);
+  const [totalWarpEnds, setTotalWarpEnds] = useState<number | ''>(7040);
   
   const [weftDensity, setWeftDensity] = useState<number | ''>(20);
   const [requiredRpm, setRequiredRpm] = useState<number | ''>(550);
@@ -35,6 +37,7 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Synchronizers
   const handleReedWidthChange = (val: number | '') => {
     setReedWidth(val);
     const numReed = Number(val) || 0;
@@ -44,6 +47,68 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
       } else if (totalWarpEnds !== '') {
         setWarpDensity(Number((Number(totalWarpEnds) / numReed).toFixed(2)));
       }
+    }
+  };
+
+  const handleReedNumberChange = (val: number | '') => {
+    setReedNumber(val);
+    const rNum = Number(val) || 0;
+    const epd = Number(endsPerDent) || 0;
+    const rWidth = Number(reedWidth) || 0;
+    if (rNum > 0 && epd > 0) {
+      const calculatedDensity = Number((rNum * epd).toFixed(2));
+      setWarpDensity(calculatedDensity);
+      if (rWidth > 0) {
+        setTotalWarpEnds(Math.round(calculatedDensity * rWidth));
+      }
+    }
+  };
+
+  const handleEndsPerDentChange = (val: number | '') => {
+    setEndsPerDent(val);
+    const epd = Number(val) || 0;
+    const rNum = Number(reedNumber) || 0;
+    const rWidth = Number(reedWidth) || 0;
+    if (rNum > 0 && epd > 0) {
+      const calculatedDensity = Number((rNum * epd).toFixed(2));
+      setWarpDensity(calculatedDensity);
+      if (rWidth > 0) {
+        setTotalWarpEnds(Math.round(calculatedDensity * rWidth));
+      }
+    }
+  };
+
+  const handleWarpDensityChange = (val: number | '') => {
+    setWarpDensity(val);
+    const density = Number(val) || 0;
+    const rWidth = Number(reedWidth) || 0;
+    const epd = Number(endsPerDent) || 0;
+
+    if (val !== '' && rWidth > 0) {
+      setTotalWarpEnds(Math.round(density * rWidth));
+    } else if (val === '') {
+      setTotalWarpEnds('');
+    }
+
+    if (density > 0 && epd > 0) {
+      setReedNumber(Number((density / epd).toFixed(2)));
+    }
+  };
+
+  const handleTotalWarpEndsChange = (val: number | '') => {
+    setTotalWarpEnds(val);
+    const totalEnds = Number(val) || 0;
+    const rWidth = Number(reedWidth) || 0;
+    const epd = Number(endsPerDent) || 0;
+
+    if (val !== '' && rWidth > 0) {
+      const density = Number((totalEnds / rWidth).toFixed(2));
+      setWarpDensity(density);
+      if (density > 0 && epd > 0) {
+        setReedNumber(Number((density / epd).toFixed(2)));
+      }
+    } else if (val === '') {
+      setWarpDensity('');
     }
   };
 
@@ -58,6 +123,8 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
     setWeaveStructure('توييل 2/2');
     setReedWidth(220);
     setFabricWidth(190);
+    setReedNumber(16);
+    setEndsPerDent(2);
     setWarpDensity(32);
     setTotalWarpEnds(7040); // 32 * 220
     setWeftDensity(20);
@@ -79,6 +146,9 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
     setReedWidth(f.reedWidth);
     setFabricWidth(f.fabricWidth);
     
+    setReedNumber(f.reedNumber !== undefined ? (typeof f.reedNumber === 'number' ? f.reedNumber : Number(f.reedNumber) || '') : 16);
+    setEndsPerDent(f.endsPerDent !== undefined ? f.endsPerDent : 2);
+
     const density = f.warpDensity || 30;
     const ends = f.totalWarpEnds || Math.round(density * (f.reedWidth || 220));
     setWarpDensity(density);
@@ -131,6 +201,8 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
         weaveStructure,
         reedWidth: rWidth,
         fabricWidth: fWidth,
+        reedNumber: reedNumber !== '' ? reedNumber : undefined,
+        endsPerDent: endsPerDent !== '' ? Number(endsPerDent) : undefined,
         warpDensity: finalWarpDensity,
         totalWarpEnds: finalTotalWarpEnds,
         weftDensity: Number(weftDensity) || 20,
@@ -221,6 +293,13 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
                   <div>
                     <span className="text-slate-400 block text-[10px]">عرض المشط / القماش:</span>
                     <strong className="text-slate-700 dark:text-slate-200 font-semibold">{fabric.reedWidth} / {fabric.fabricWidth} سم</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">نمرة المشط / خيوط البشرة:</span>
+                    <strong className="text-slate-700 dark:text-slate-200 font-semibold">
+                      {fabric.reedNumber || '—'} {fabric.reedNumber ? 'سن/سم' : ''}
+                      {fabric.endsPerDent ? ` (${fabric.endsPerDent} خيط/بشرة)` : ''}
+                    </strong>
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[10px]">مواصفة السداء (على المشط):</span>
@@ -423,50 +502,63 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
                 </div>
               </div>
 
-              {/* Warp Inputs: Either Density or Total Ends (Auto calculated based on Reed Width) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Warp & Reed Specifications */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    كثافة السداء في المشط (خيوط/سم)
-                    <span className="text-[11px] text-slate-400 font-normal mr-1">(اختياري)</span>
+                    نمرة المشط (سن/سم)
+                    <span className="text-[10px] text-slate-400 font-normal mr-1">(اختياري)</span>
                   </label>
                   <input
                     type="number"
                     step="0.1"
-                    value={warpDensity}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? '' : Number(e.target.value);
-                      setWarpDensity(val);
-                      if (val !== '' && Number(reedWidth) > 0) {
-                        setTotalWarpEnds(Math.round(Number(val) * Number(reedWidth)));
-                      } else if (val === '') {
-                        setTotalWarpEnds('');
-                      }
-                    }}
-                    placeholder="مثال: 32"
+                    value={reedNumber}
+                    onChange={(e) => handleReedNumberChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="مثال: 16"
                     className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    عدد خيوط السداء الكلي
-                    <span className="text-[11px] text-slate-400 font-normal mr-1">(اختياري)</span>
+                    الخيوط في البشرة
+                    <span className="text-[10px] text-slate-400 font-normal mr-1">(خيط/سن)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={endsPerDent}
+                    onChange={(e) => handleEndsPerDentChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="مثال: 2"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    كثافة السداء (خيط/سم)
+                    <span className="text-[10px] text-slate-400 font-normal mr-1">(اختياري)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={warpDensity}
+                    onChange={(e) => handleWarpDensityChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="مثال: 32"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    إجمالي خيوط السداء
+                    <span className="text-[10px] text-slate-400 font-normal mr-1">(اختياري)</span>
                   </label>
                   <input
                     type="number"
                     value={totalWarpEnds}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? '' : Number(e.target.value);
-                      setTotalWarpEnds(val);
-                      if (val !== '' && Number(reedWidth) > 0) {
-                        setWarpDensity(Number((Number(val) / Number(reedWidth)).toFixed(2)));
-                      } else if (val === '') {
-                        setWarpDensity('');
-                      }
-                    }}
+                    onChange={(e) => handleTotalWarpEndsChange(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="مثال: 7040"
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl font-medium"
                   />
                 </div>
               </div>
