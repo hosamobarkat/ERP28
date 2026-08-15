@@ -77,7 +77,7 @@ function createInitialSeedData(): DatabaseData {
     {
       id: 'u-1',
       username: 'admin',
-      fullName: 'أحمد محمود (المدير العام)',
+      fullName: 'مدير النظام (المدير العام)',
       role: 'manager',
       active: true,
       createdAt: new Date().toISOString(),
@@ -85,7 +85,7 @@ function createInitialSeedData(): DatabaseData {
     {
       id: 'u-2',
       username: 'coordinator',
-      fullName: 'خالد مصطفى (منسق الإنتاج)',
+      fullName: 'منسق عام الإنتاج والتخطيط',
       role: 'coordinator',
       active: true,
       createdAt: new Date().toISOString(),
@@ -93,7 +93,7 @@ function createInitialSeedData(): DatabaseData {
     {
       id: 'u-3',
       username: 'hall_manager',
-      fullName: 'سامر حسن (مدير الصالة 1)',
+      fullName: 'مدير صالة النسيج الأولى',
       role: 'hall_manager',
       hallId: 'hall-1',
       active: true,
@@ -394,7 +394,7 @@ function createInitialSeedData(): DatabaseData {
       theoreticalMeters: 97.5,
       efficiencyPercent: 94.4,
       notes: 'إنتاج ممتاز في الوردية الأولى',
-      createdBy: 'سامر حسن',
+      createdBy: 'مدير الصالة (مشرف الوردية)',
       createdAt: new Date().toISOString(),
     },
     {
@@ -417,7 +417,7 @@ function createInitialSeedData(): DatabaseData {
       theoreticalMeters: 91.8,
       efficiencyPercent: 87.1,
       notes: 'توقف بسيط للشدة',
-      createdBy: 'سامر حسن',
+      createdBy: 'مدير الصالة (مشرف الوردية)',
       createdAt: new Date().toISOString(),
     },
   ];
@@ -435,7 +435,7 @@ function createInitialSeedData(): DatabaseData {
       durationMinutes: 210,
       reason: 'mechanical',
       notes: 'استبدال السير الرئيسي وضبط المشط',
-      createdBy: 'سامر حسن',
+      createdBy: 'فني الصيانة والمراقبة',
       createdAt: new Date().toISOString(),
     },
   ];

@@ -28,7 +28,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh })
     setEditingUser(null);
     setUsername(`user_${users.length + 1}`);
     setPassword('123789');
-    setFullName(`مستخدم جديد ${users.length + 1}`);
+    setFullName(`شاغر وظيفي جديد ${users.length + 1}`);
     setRole('hall_manager');
     setAssignedHallId(halls.length > 0 ? halls[0].id : '');
     setError('');
@@ -199,12 +199,15 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh })
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  المسمى / الشاغر الوظيفي (Job Title / Position)
+                </label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
+                  placeholder="مثال: مدير صالة النسيج، مشرف وردية، منسق إنتاج..."
                   className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
                 />
               </div>

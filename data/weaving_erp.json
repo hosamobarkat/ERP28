@@ -1,0 +1,446 @@
+{
+  "users": [
+    {
+      "id": "u-1",
+      "username": "admin",
+      "fullName": "مدير النظام (المدير العام)",
+      "role": "manager",
+      "active": true,
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "u-2",
+      "username": "coordinator",
+      "fullName": "منسق عام الإنتاج والتخطيط",
+      "role": "coordinator",
+      "active": true,
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "u-3",
+      "username": "hall_manager",
+      "fullName": "مدير صالة النسيج الأولى",
+      "role": "hall_manager",
+      "hallId": "hall-1",
+      "active": true,
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "userPasswords": {
+    "u-1": "$2b$10$scCuSFfT3Va.TRkwO2d.GeaBR6kdpMU664w4LqYQ4n8IQTmiPOmVC",
+    "u-2": "$2b$10$scCuSFfT3Va.TRkwO2d.GeaBR6kdpMU664w4LqYQ4n8IQTmiPOmVC",
+    "u-3": "$2b$10$scCuSFfT3Va.TRkwO2d.GeaBR6kdpMU664w4LqYQ4n8IQTmiPOmVC"
+  },
+  "halls": [
+    {
+      "id": "hall-1",
+      "number": "1",
+      "name": "صالة النسيج الرئيسية 1",
+      "description": "صالة الأنوال السريعة عالية الدقة للنسيج الثقيل والمتوسط",
+      "totalLoomsCount": 5,
+      "status": "active",
+      "notes": "تعمل بـ 3 ورديات يومياً",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "hall-2",
+      "number": "2",
+      "name": "صالة النسيج 2 (التوسع الجديد)",
+      "description": "صالة أنوال الجاكارد والأقمشة الجاهزة",
+      "totalLoomsCount": 0,
+      "status": "active",
+      "notes": "جاهزة لإضافة أنوال جديدة",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "loomGroups": [
+    {
+      "id": "grp-1",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "name": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "description": "أنوال دورنييه وسولزر عالية السرعة",
+      "loomCount": 3,
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "grp-2",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "name": "المجموعة B (أنوال السادة والأقمشة الخفيفة)",
+      "description": "أنوال تويوتا الهوائية",
+      "loomCount": 2,
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "looms": [
+    {
+      "id": "loom-1",
+      "loomNumber": "1",
+      "code": "NOL-01",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "manufacturer": "Dornier",
+      "model": "P1 Rapier 2022",
+      "year": 2022,
+      "rpm": 520,
+      "picksPerCm": 20,
+      "reedWidth": 220,
+      "fabricWidth": 190,
+      "dailyOperatingHours": 24,
+      "shiftsCount": 3,
+      "defaultEfficiencyPercent": 88,
+      "status": "running",
+      "notes": "حالة ممتازة",
+      "currentOrderNumber": "PO-2026-001",
+      "currentFabricName": "Gabardine 01 - قماش جابردين فاخر",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "loom-2",
+      "loomNumber": "2",
+      "code": "NOL-02",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "manufacturer": "Sulzer",
+      "model": "G6300 Rapier",
+      "year": 2021,
+      "rpm": 490,
+      "picksPerCm": 20,
+      "reedWidth": 210,
+      "fabricWidth": 185,
+      "dailyOperatingHours": 24,
+      "shiftsCount": 3,
+      "defaultEfficiencyPercent": 85,
+      "status": "running",
+      "notes": "يعمل بكفاءة عالية",
+      "currentOrderNumber": "PO-2026-001",
+      "currentFabricName": "Gabardine 01 - قماش جابردين فاخر",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "loom-3",
+      "loomNumber": "3",
+      "code": "NOL-03",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "manufacturer": "Toyota",
+      "model": "JAT810 Airjet",
+      "year": 2023,
+      "rpm": 600,
+      "picksPerCm": 22,
+      "reedWidth": 190,
+      "fabricWidth": 170,
+      "dailyOperatingHours": 24,
+      "shiftsCount": 3,
+      "defaultEfficiencyPercent": 90,
+      "status": "running",
+      "notes": "نول نسيج هوائي سريع جداً",
+      "currentOrderNumber": "PO-2026-001",
+      "currentFabricName": "Gabardine 01 - قماش جابردين فاخر",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "loom-4",
+      "loomNumber": "4",
+      "code": "NOL-04",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-2",
+      "groupName": "المجموعة B (أنوال السادة والأقمشة الخفيفة)",
+      "manufacturer": "Picanol",
+      "model": "OmniPlus Summum",
+      "year": 2020,
+      "rpm": 480,
+      "picksPerCm": 18,
+      "reedWidth": 200,
+      "fabricWidth": 180,
+      "dailyOperatingHours": 24,
+      "shiftsCount": 3,
+      "defaultEfficiencyPercent": 82,
+      "status": "stopped",
+      "notes": "متوقف لانتظار تغطية السداء",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "loom-5",
+      "loomNumber": "5",
+      "code": "NOL-05",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-2",
+      "groupName": "المجموعة B (أنوال السادة والأقمشة الخفيفة)",
+      "manufacturer": "Tsudakoma",
+      "model": "ZAX9200i",
+      "year": 2019,
+      "rpm": 500,
+      "picksPerCm": 20,
+      "reedWidth": 190,
+      "fabricWidth": 175,
+      "dailyOperatingHours": 24,
+      "shiftsCount": 3,
+      "defaultEfficiencyPercent": 85,
+      "status": "maintenance",
+      "notes": "تحت الصيانة الميكانيكية الدورية",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "fabricItems": [
+    {
+      "id": "fab-1",
+      "code": "FAB-GAB-01",
+      "name": "Gabardine 01 - قماش جابردين فاخر",
+      "description": "نسيج جابردين قطني 100% عالي المتانة للبدلات والزي الرسمي",
+      "warpYarnCount": "Ne 30/2",
+      "weftYarnCount": "Ne 20/1",
+      "yarnType": "قطن ممشوق 100%",
+      "weaveStructure": "مبرد 2/2 Twill",
+      "reedWidth": 220,
+      "fabricWidth": 190,
+      "warpDensity": 32,
+      "weftDensity": 20,
+      "requiredRpm": 500,
+      "requiredProductionMeters": 50000,
+      "startDate": "2026-08-01",
+      "targetDeliveryDate": "2026-09-15",
+      "notes": "مواصفات الجودة عالية جداً",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "fab-2",
+      "code": "FAB-POP-02",
+      "name": "Poplin 02 - قماش بوبلين ملون",
+      "description": "قماش بوبلين خفيف للقمصان الصيفية",
+      "warpYarnCount": "Ne 40/1",
+      "weftYarnCount": "Ne 40/1",
+      "yarnType": "قطن / بوليستر 65/35",
+      "weaveStructure": "سادة 1/1 Plain",
+      "reedWidth": 190,
+      "fabricWidth": 170,
+      "warpDensity": 40,
+      "weftDensity": 24,
+      "requiredRpm": 550,
+      "requiredProductionMeters": 30000,
+      "startDate": "2026-08-10",
+      "targetDeliveryDate": "2026-09-30",
+      "notes": "جاهز لبدء أوردر جديد",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "productionOrders": [
+    {
+      "id": "po-1",
+      "orderNumber": "PO-2026-001",
+      "fabricItemId": "fab-1",
+      "fabricItemCode": "FAB-GAB-01",
+      "fabricItemName": "Gabardine 01 - قماش جابردين فاخر",
+      "requiredQuantityMeters": 50000,
+      "producedQuantityMeters": 14500,
+      "startDate": "2026-08-01",
+      "targetDeliveryDate": "2026-09-15",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "assignedLoomIds": [
+        "loom-1",
+        "loom-2",
+        "loom-3"
+      ],
+      "status": "in_progress",
+      "notes": "طلب توريد لصالح شركة المنسوجات الوطنية",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "loomAssignments": [
+    {
+      "id": "la-1",
+      "productionOrderId": "po-1",
+      "loomId": "loom-1",
+      "loomNumber": "1",
+      "dailyExpectedMeters": 275,
+      "producedMeters": 5200,
+      "remainingMeters": 11466,
+      "expectedDays": 42,
+      "status": "active"
+    },
+    {
+      "id": "la-2",
+      "productionOrderId": "po-1",
+      "loomId": "loom-2",
+      "loomNumber": "2",
+      "dailyExpectedMeters": 250,
+      "producedMeters": 4800,
+      "remainingMeters": 11866,
+      "expectedDays": 47,
+      "status": "active"
+    },
+    {
+      "id": "la-3",
+      "productionOrderId": "po-1",
+      "loomId": "loom-3",
+      "loomNumber": "3",
+      "dailyExpectedMeters": 265,
+      "producedMeters": 4500,
+      "remainingMeters": 12166,
+      "expectedDays": 46,
+      "status": "active"
+    }
+  ],
+  "productionEntries": [
+    {
+      "id": "pe-1",
+      "date": "2026-08-15",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "loomId": "loom-1",
+      "loomNumber": "1",
+      "fabricItemId": "fab-1",
+      "fabricItemName": "Gabardine 01 - قماش جابردين فاخر",
+      "productionOrderId": "po-1",
+      "orderNumber": "PO-2026-001",
+      "shift": "shift_1",
+      "operatingHours": 7.5,
+      "downtimeHours": 0.5,
+      "actualMeters": 92,
+      "theoreticalMeters": 97.5,
+      "efficiencyPercent": 94.4,
+      "notes": "إنتاج ممتاز في الوردية الأولى",
+      "createdBy": "مدير الصالة (مشرف الوردية)",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    },
+    {
+      "id": "pe-2",
+      "date": "2026-08-15",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "groupId": "grp-1",
+      "groupName": "المجموعة A (أنوال الجاكارد والنسيج المركب)",
+      "loomId": "loom-2",
+      "loomNumber": "2",
+      "fabricItemId": "fab-1",
+      "fabricItemName": "Gabardine 01 - قماش جابردين فاخر",
+      "productionOrderId": "po-1",
+      "orderNumber": "PO-2026-001",
+      "shift": "shift_1",
+      "operatingHours": 7,
+      "downtimeHours": 1,
+      "actualMeters": 80,
+      "theoreticalMeters": 91.8,
+      "efficiencyPercent": 87.1,
+      "notes": "توقف بسيط للشدة",
+      "createdBy": "مدير الصالة (مشرف الوردية)",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "loomStoppages": [
+    {
+      "id": "stp-1",
+      "loomId": "loom-5",
+      "loomNumber": "5",
+      "hallId": "hall-1",
+      "hallName": "صالة النسيج الرئيسية 1",
+      "date": "2026-08-15",
+      "startTime": "08:00",
+      "endTime": "11:30",
+      "durationMinutes": 210,
+      "reason": "mechanical",
+      "notes": "استبدال السير الرئيسي وضبط المشط",
+      "createdBy": "فني الصيانة والمراقبة",
+      "createdAt": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log-1786775217470-afuv",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "manager",
+      "action": "login",
+      "targetEntity": "تسجيل دخول",
+      "previousValue": "",
+      "newValue": "تسجيل دخول بنجاح",
+      "timestamp": "2026-08-15T06:26:57.470Z"
+    },
+    {
+      "id": "log-1786775212792-yloa",
+      "userId": "u-2",
+      "username": "coordinator",
+      "role": "coordinator",
+      "action": "login",
+      "targetEntity": "تسجيل دخول",
+      "previousValue": "",
+      "newValue": "تسجيل دخول بنجاح",
+      "timestamp": "2026-08-15T06:26:52.792Z"
+    },
+    {
+      "id": "log-1786775207631-vzfl",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "manager",
+      "action": "login",
+      "targetEntity": "تسجيل دخول",
+      "previousValue": "",
+      "newValue": "تسجيل دخول بنجاح",
+      "timestamp": "2026-08-15T06:26:47.631Z"
+    },
+    {
+      "id": "log-1786772369439-uzo4",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "manager",
+      "action": "login",
+      "targetEntity": "تسجيل دخول",
+      "previousValue": "",
+      "newValue": "تسجيل دخول بنجاح",
+      "timestamp": "2026-08-15T05:39:29.439Z"
+    },
+    {
+      "id": "log-1",
+      "userId": "u-1",
+      "username": "admin",
+      "role": "manager",
+      "action": "login",
+      "targetEntity": "نظام ERP قسم النسيج",
+      "newValue": "تسجيل دخول ناجح للمدير",
+      "timestamp": "2026-08-15T05:39:26.151Z"
+    }
+  ],
+  "settings": {
+    "factoryName": "معمل النسيج الوطني الحديث",
+    "departmentName": "قسم النسيج والأنوال الإلكترونية",
+    "shifts": [
+      {
+        "id": "shift_1",
+        "name": "الوردية الأولى (الصباحية)",
+        "startTime": "07:00",
+        "endTime": "15:00"
+      },
+      {
+        "id": "shift_2",
+        "name": "الوردية الثانية (المسائية)",
+        "startTime": "15:00",
+        "endTime": "23:00"
+      },
+      {
+        "id": "shift_3",
+        "name": "الوردية الثالثة (الليلية)",
+        "startTime": "23:00",
+        "endTime": "07:00"
+      }
+    ],
+    "defaultWorkingHours": 24,
+    "targetEfficiencyPercent": 85,
+    "alertLowEfficiencyThreshold": 75,
+    "alertLongDowntimeMinutes": 120,
+    "isDemoData": true
+  }
+}
