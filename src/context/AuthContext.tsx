@@ -24,13 +24,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      const saved = localStorage.getItem('weaving_erp_user');
+      // Clear legacy localStorage auto-login tokens if present
+      localStorage.removeItem('weaving_erp_token');
+      localStorage.removeItem('weaving_erp_user');
+
+      const saved = sessionStorage.getItem('weaving_erp_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
   });
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('weaving_erp_token'));
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return sessionStorage.getItem('weaving_erp_token');
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -39,7 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .then((res) => {
           if (res?.user) {
             setUser(res.user);
-            localStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
+            sessionStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
+          } else {
+            logout();
           }
         })
         .catch(() => {
@@ -54,14 +66,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-    localStorage.setItem('weaving_erp_token', newToken);
-    localStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
+    sessionStorage.setItem('weaving_erp_token', newToken);
+    sessionStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
     setLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    sessionStorage.removeItem('weaving_erp_token');
+    sessionStorage.removeItem('weaving_erp_user');
     localStorage.removeItem('weaving_erp_token');
     localStorage.removeItem('weaving_erp_user');
   };

@@ -456,9 +456,15 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
 
   // Auth Me
   if (endpoint === '/api/auth/me') {
-    const saved = localStorage.getItem('weaving_erp_user');
-    const user = saved ? JSON.parse(saved) : db.users[0];
-    return { user };
+    const authHeader = options.headers ? (options.headers as any)['Authorization'] || (options.headers as any)['authorization'] : null;
+    if (!authHeader) {
+      throw new Error('غير مصرح - يرجى تسجيل الدخول');
+    }
+    const saved = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
+    if (!saved) {
+      throw new Error('جلسة العمل منتهية - يرجى تسجيل الدخول');
+    }
+    return { user: JSON.parse(saved) };
   }
 
   // Halls

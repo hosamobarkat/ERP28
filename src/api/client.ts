@@ -4,7 +4,13 @@ import { handleLocalMockRequest } from './mockFallback';
  * API Client with Bearer token authentication and automatic offline/Vercel static fallback
  */
 
-const getAuthToken = (): string | null => localStorage.getItem('weaving_erp_token');
+const getAuthToken = (): string | null => {
+  try {
+    return sessionStorage.getItem('weaving_erp_token') || localStorage.getItem('weaving_erp_token');
+  } catch {
+    return null;
+  }
+};
 
 export async function apiFetch<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
@@ -24,6 +30,8 @@ export async function apiFetch<T = any>(endpoint: string, options: RequestInit =
     });
 
     if (response.status === 401 && !endpoint.includes('/api/auth/login')) {
+      sessionStorage.removeItem('weaving_erp_token');
+      sessionStorage.removeItem('weaving_erp_user');
       localStorage.removeItem('weaving_erp_token');
       localStorage.removeItem('weaving_erp_user');
     }

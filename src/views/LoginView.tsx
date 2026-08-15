@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Cpu, Lock, Shield, ClipboardList, Factory, AlertCircle, Check, ArrowRight, KeyRound } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Cpu, Lock, Shield, ClipboardList, Factory, AlertCircle, Check, ArrowRight, KeyRound, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 import { UserRole } from '../types';
@@ -62,38 +62,72 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
 
 export const LoginView: React.FC = () => {
   const { login } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>('manager');
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [customUsername, setCustomUsername] = useState('');
+  const [isCustomMode, setIsCustomMode] = useState(false);
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const selectedAccount = ACCOUNT_OPTIONS.find((a) => a.role === selectedRole) || ACCOUNT_OPTIONS[0];
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedAccount = ACCOUNT_OPTIONS.find((a) => a.role === selectedRole);
 
   const handleSelectAccount = (opt: AccountOption) => {
     setSelectedRole(opt.role);
+    setIsCustomMode(false);
+    setPassword('');
     setError('');
     setStep(2);
+    setTimeout(() => {
+      passwordInputRef.current?.focus();
+    }, 100);
+  };
+
+  const handleCustomAccount = () => {
+    setIsCustomMode(true);
+    setSelectedRole(null);
+    setPassword('');
+    setError('');
+    setStep(2);
+    setTimeout(() => {
+      passwordInputRef.current?.focus();
+    }, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAccount) {
-      setError('يرجى تحديد نوع الحساب أولاً');
+    if (!isCustomMode && !selectedAccount) {
+      setError('يرجى تحديد الحساب أو الشاغر الوظيفي أولاً');
+      setStep(1);
       return;
     }
+
+    if (isCustomMode && !customUsername.trim()) {
+      setError('يرجى إدخال اسم المستخدم');
+      return;
+    }
+
+    if (!password) {
+      setError('يرجى إدخال كلمة المرور');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
+      const payload = isCustomMode
+        ? { username: customUsername.trim(), password }
+        : { role: selectedAccount!.role, username: selectedAccount!.username, password };
+
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({
-          role: selectedAccount.role,
-          username: selectedAccount.username,
-          password,
-        }),
+        body: JSON.stringify(payload),
       });
+
       login(data.token, data.user);
     } catch (err: any) {
       setError(err.message || 'كلمة المرور غير صحيحة، يرجى إعادة المحاولة');
@@ -109,7 +143,7 @@ export const LoginView: React.FC = () => {
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative w-full max-w-xl bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-white">
+      <div className="relative w-full max-w-xl bg-slate-900/95 backdrop-blur-2xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-white">
         {/* Header Branding */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-500 to-blue-600 flex items-center justify-center shadow-xl shadow-indigo-500/25 mb-3">
@@ -117,12 +151,12 @@ export const LoginView: React.FC = () => {
           </div>
           <h1 className="text-2xl font-black text-white tracking-wide">نظام ادارة الانتاج</h1>
           <p className="text-xs text-slate-400 mt-1 font-medium">
-            يرجى تحديد الشاغر الوظيفي ثم إدخال كلمة المرور للمتابعة
+            يرجى تحديد الشاغر الوظيفي وإدخال كلمة المرور لتسجيل الدخول
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs flex items-center gap-2.5 animate-shake">
+          <div className="mb-6 p-3.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
@@ -146,14 +180,14 @@ export const LoginView: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {ACCOUNT_OPTIONS.map((opt) => {
               const Icon = opt.icon;
-              const isSelected = selectedRole === opt.role;
+              const isSelected = selectedRole === opt.role && !isCustomMode;
 
               return (
                 <button
                   key={opt.role}
                   type="button"
                   onClick={() => handleSelectAccount(opt)}
-                  className={`relative p-4 rounded-2xl border text-right transition-all flex flex-col justify-between group ${
+                  className={`relative p-4 rounded-2xl border text-right transition-all flex flex-col justify-between group cursor-pointer ${
                     isSelected ? opt.selectedBg : `bg-slate-800/50 border-slate-800 ${opt.hoverBg}`
                   }`}
                 >
@@ -180,7 +214,7 @@ export const LoginView: React.FC = () => {
                     <span className={`px-2 py-0.5 rounded-md border font-mono font-semibold ${opt.badgeColor}`}>
                       {opt.username}
                     </span>
-                    <span className="text-slate-500 group-hover:text-slate-300 flex items-center gap-0.5">
+                    <span className="text-slate-500 group-hover:text-slate-300 flex items-center gap-0.5 font-medium">
                       <span>اختيار</span>
                       <ArrowRight className="w-3 h-3 rotate-180" />
                     </span>
@@ -192,60 +226,124 @@ export const LoginView: React.FC = () => {
         </div>
 
         {/* STEP 2: PASSWORD ENTRY */}
-        <form onSubmit={handleSubmit} className="mt-6 pt-6 border-t border-slate-800 space-y-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px]">2</span>
-              <span>إدخال كلمة المرور (Password):</span>
-            </span>
-          </div>
+        {step === 2 && (
+          <form onSubmit={handleSubmit} autoComplete="off" className="mt-6 pt-6 border-t border-slate-800 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px]">2</span>
+                <span>إدخال كلمة المرور (Password):</span>
+              </span>
+            </div>
 
-          {/* Selected Role Summary Bar */}
-          <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${selectedAccount.iconBg} flex items-center justify-center`}>
-                <selectedAccount.icon className="w-5 h-5 text-white" />
+            {/* Selected Account Summary Bar */}
+            {selectedAccount && !isCustomMode && (
+              <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${selectedAccount.iconBg} flex items-center justify-center shadow-sm`}>
+                    <selectedAccount.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">{selectedAccount.title}</p>
+                    <p className="text-[10px] text-slate-400">اسم المستخدم: <span className="font-mono text-slate-300">{selectedAccount.username}</span></p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(1);
+                    setSelectedRole(null);
+                    setPassword('');
+                  }}
+                  className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold hover:underline px-2 py-1 rounded-lg bg-indigo-950/40 border border-indigo-800/50"
+                >
+                  تغيير الحساب
+                </button>
               </div>
+            )}
+
+            {isCustomMode && (
               <div>
-                <p className="text-xs font-bold text-white">{selectedAccount.title}</p>
-                <p className="text-[10px] text-slate-400">اسم المستخدم: {selectedAccount.username}</p>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">اسم المستخدم</label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={customUsername}
+                    onChange={(e) => setCustomUsername(e.target.value)}
+                    required
+                    autoComplete="off"
+                    placeholder="أدخل اسم المستخدم..."
+                    className="w-full pl-4 pr-10 py-3 text-sm bg-slate-800/90 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300">كلمة المرور</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                >
+                  {showPassword ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>إخفاء</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>إظهار</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  ref={passwordInputRef}
+                  type={showPassword ? 'text' : 'password'}
+                  name="system_weaving_auth_pwd"
+                  id="system_weaving_auth_pwd"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="أدخل كلمة المرور الخاصة بالحساب..."
+                  className="w-full pl-10 pr-10 py-3.5 text-sm bg-slate-800/90 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500 font-mono tracking-wider"
+                />
               </div>
             </div>
+
+            <button
+              type="submit"
+              disabled={loading || !password}
+              className="w-full py-3.5 px-4 mt-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 hover:from-indigo-500 hover:to-blue-500 font-bold text-sm text-white rounded-xl shadow-xl shadow-indigo-600/30 transition-all transform active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4" />
+              <span>{loading ? 'جاري التحقق والتسجيل...' : `تسجيل الدخول ${selectedAccount ? `كـ (${selectedAccount.title})` : ''}`}</span>
+            </button>
+          </form>
+        )}
+
+        {/* Fallback button to login with another custom user */}
+        {step === 1 && (
+          <div className="mt-4 pt-3 border-t border-slate-800/60 text-center">
             <button
               type="button"
-              onClick={() => setStep(1)}
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold hover:underline"
+              onClick={handleCustomAccount}
+              className="text-xs text-slate-400 hover:text-indigo-400 transition-colors inline-flex items-center gap-1.5"
             >
-              تغيير الشاغر
+              <User className="w-3.5 h-3.5" />
+              <span>تسجيل الدخول باسم مستخدم آخر</span>
             </button>
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">كلمة المرور</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="أدخل كلمة المرور الخاصة بالحساب..."
-                className="w-full pl-4 pr-10 py-3.5 text-sm bg-slate-800/90 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500 font-mono"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 px-4 mt-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 hover:from-indigo-500 hover:to-blue-500 font-bold text-sm text-white rounded-xl shadow-xl shadow-indigo-600/30 transition-all transform active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <KeyRound className="w-4 h-4" />
-            <span>{loading ? 'جاري التحقق...' : `تسجيل الدخول كـ (${selectedAccount.title})`}</span>
-          </button>
-        </form>
+        )}
       </div>
     </div>
   );
 };
-
