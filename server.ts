@@ -371,9 +371,10 @@ app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator')
   }
 
   const db = loadDatabase();
+  const rWidth = Number(reedWidth) || 220;
   const fWidth = Number(fabricWidth) || 190;
   const wDensity = Number(warpDensity) || 30;
-  const ends = Number(totalWarpEnds) || Math.round(wDensity * fWidth);
+  const ends = Number(totalWarpEnds) || Math.round(wDensity * rWidth);
 
   const newItem = {
     id: `fab-${Date.now()}`,
@@ -384,7 +385,7 @@ app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator')
     weftYarnCount: weftYarnCount || '',
     yarnType: yarnType || '',
     weaveStructure: weaveStructure || '',
-    reedWidth: Number(reedWidth) || 220,
+    reedWidth: rWidth,
     fabricWidth: fWidth,
     warpDensity: wDensity,
     totalWarpEnds: ends,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Plus, Edit2, Trash2, AlertCircle, X, Calculator, ArrowLeftRight } from 'lucide-react';
+import { Layers, Plus, Edit2, Trash2, AlertCircle, X } from 'lucide-react';
 import { FabricItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
@@ -21,40 +21,29 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
   const [weftYarnCount, setWeftYarnCount] = useState('Ne 20/1');
   const [yarnType, setYarnType] = useState('قطن 100%');
   const [weaveStructure, setWeaveStructure] = useState('توييل 2/2');
-  const [reedWidth, setReedWidth] = useState(220);
-  const [fabricWidth, setFabricWidth] = useState(190);
+  const [reedWidth, setReedWidth] = useState<number | ''>(220);
+  const [fabricWidth, setFabricWidth] = useState<number | ''>(190);
   
-  // Warp specification: dual inputs (Density vs Total Ends)
-  const [warpInputMode, setWarpInputMode] = useState<'density' | 'totalEnds'>('density');
-  const [warpDensity, setWarpDensity] = useState<number>(32);
-  const [totalWarpEnds, setTotalWarpEnds] = useState<number>(6080);
+  // Warp inputs: either density or total ends (automatic calculation)
+  const [warpDensity, setWarpDensity] = useState<number | ''>(32);
+  const [totalWarpEnds, setTotalWarpEnds] = useState<number | ''>(6080);
   
-  const [weftDensity, setWeftDensity] = useState<number>(20);
-  const [requiredRpm, setRequiredRpm] = useState<number>(550);
+  const [weftDensity, setWeftDensity] = useState<number | ''>(20);
+  const [requiredRpm, setRequiredRpm] = useState<number | ''>(550);
   const [notes, setNotes] = useState('');
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Sync calculations
-  const handleWarpDensityChange = (val: number) => {
-    setWarpDensity(val);
-    const calculatedTotal = Math.round(val * (fabricWidth || 1));
-    setTotalWarpEnds(calculatedTotal);
-  };
-
-  const handleTotalWarpEndsChange = (val: number) => {
-    setTotalWarpEnds(val);
-    const calculatedDensity = fabricWidth > 0 ? Number((val / fabricWidth).toFixed(2)) : 0;
-    setWarpDensity(calculatedDensity);
-  };
-
-  const handleFabricWidthChange = (val: number) => {
-    setFabricWidth(val);
-    if (warpInputMode === 'density') {
-      setTotalWarpEnds(Math.round(warpDensity * val));
-    } else {
-      setWarpDensity(val > 0 ? Number((totalWarpEnds / val).toFixed(2)) : 0);
+  const handleReedWidthChange = (val: number | '') => {
+    setReedWidth(val);
+    const numReed = Number(val) || 0;
+    if (numReed > 0) {
+      if (warpDensity !== '') {
+        setTotalWarpEnds(Math.round(Number(warpDensity) * numReed));
+      } else if (totalWarpEnds !== '') {
+        setWarpDensity(Number((Number(totalWarpEnds) / numReed).toFixed(2)));
+      }
     }
   };
 
@@ -69,9 +58,8 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
     setWeaveStructure('توييل 2/2');
     setReedWidth(220);
     setFabricWidth(190);
-    setWarpInputMode('density');
     setWarpDensity(32);
-    setTotalWarpEnds(6080);
+    setTotalWarpEnds(7040); // 32 * 220
     setWeftDensity(20);
     setRequiredRpm(550);
     setNotes('');
@@ -92,10 +80,9 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
     setFabricWidth(f.fabricWidth);
     
     const density = f.warpDensity || 30;
-    const ends = f.totalWarpEnds || Math.round(density * f.fabricWidth);
+    const ends = f.totalWarpEnds || Math.round(density * (f.reedWidth || 220));
     setWarpDensity(density);
     setTotalWarpEnds(ends);
-    setWarpInputMode('density');
 
     setWeftDensity(f.weftDensity);
     setRequiredRpm(f.requiredRpm || 550);
@@ -120,6 +107,20 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
     setLoading(true);
 
     try {
+      const rWidth = Number(reedWidth) || 220;
+      const fWidth = Number(fabricWidth) || 190;
+      let finalWarpDensity = Number(warpDensity);
+      let finalTotalWarpEnds = Number(totalWarpEnds);
+
+      if (!finalWarpDensity && finalTotalWarpEnds && rWidth > 0) {
+        finalWarpDensity = Number((finalTotalWarpEnds / rWidth).toFixed(2));
+      } else if (finalWarpDensity && !finalTotalWarpEnds && rWidth > 0) {
+        finalTotalWarpEnds = Math.round(finalWarpDensity * rWidth);
+      } else if (!finalWarpDensity && !finalTotalWarpEnds) {
+        finalWarpDensity = 30;
+        finalTotalWarpEnds = Math.round(30 * rWidth);
+      }
+
       const payload = {
         code,
         name,
@@ -128,12 +129,12 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
         weftYarnCount,
         yarnType,
         weaveStructure,
-        reedWidth: Number(reedWidth),
-        fabricWidth: Number(fabricWidth),
-        warpDensity: Number(warpDensity),
-        totalWarpEnds: Number(totalWarpEnds),
-        weftDensity: Number(weftDensity),
-        requiredRpm: Number(requiredRpm),
+        reedWidth: rWidth,
+        fabricWidth: fWidth,
+        warpDensity: finalWarpDensity,
+        totalWarpEnds: finalTotalWarpEnds,
+        weftDensity: Number(weftDensity) || 20,
+        requiredRpm: Number(requiredRpm) || 550,
         notes,
       };
 
@@ -180,7 +181,7 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
       {/* Fabric Items Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {fabrics.map((fabric) => {
-          const totalEndsDisplay = fabric.totalWarpEnds || Math.round(fabric.warpDensity * fabric.fabricWidth);
+          const totalEndsDisplay = fabric.totalWarpEnds || Math.round(fabric.warpDensity * (fabric.reedWidth || 220));
           return (
             <div
               key={fabric.id}
@@ -222,7 +223,7 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
                     <strong className="text-slate-700 dark:text-slate-200 font-semibold">{fabric.reedWidth} / {fabric.fabricWidth} سم</strong>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[10px]">مواصفة السداء:</span>
+                    <span className="text-slate-400 block text-[10px]">مواصفة السداء (على المشط):</span>
                     <strong className="text-indigo-600 dark:text-indigo-400 font-bold">
                       {fabric.warpDensity} خيط/سم
                       <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-normal">
@@ -374,22 +375,26 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
               {/* Widths and Speeds */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">عرض المشط (سم)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    عرض المشط (سم)
+                  </label>
                   <input
                     type="number"
                     value={reedWidth}
-                    onChange={(e) => setReedWidth(Number(e.target.value))}
+                    onChange={(e) => handleReedWidthChange(e.target.value === '' ? '' : Number(e.target.value))}
                     required
                     placeholder="220"
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">عرض القماش (سم)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    عرض القماش النهائي (سم)
+                  </label>
                   <input
                     type="number"
                     value={fabricWidth}
-                    onChange={(e) => handleFabricWidthChange(Number(e.target.value))}
+                    onChange={(e) => setFabricWidth(e.target.value === '' ? '' : Number(e.target.value))}
                     required
                     placeholder="190"
                     className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
@@ -400,7 +405,7 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
                   <input
                     type="number"
                     value={weftDensity}
-                    onChange={(e) => setWeftDensity(Number(e.target.value))}
+                    onChange={(e) => setWeftDensity(e.target.value === '' ? '' : Number(e.target.value))}
                     required
                     placeholder="20"
                     className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
@@ -411,103 +416,58 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
                   <input
                     type="number"
                     value={requiredRpm}
-                    onChange={(e) => setRequiredRpm(Number(e.target.value))}
+                    onChange={(e) => setRequiredRpm(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="550"
                     className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
                   />
                 </div>
               </div>
 
-              {/* Warp Specification Dual Input & Auto Calculation Box */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 className="font-bold text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                    <Calculator className="w-4 h-4" />
-                    مواصفة خيوط السداء (إدخال الكثافة أو العدد الكلي مع الحساب التلقائي)
-                  </h4>
-                  <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px]">
-                    <button
-                      type="button"
-                      onClick={() => setWarpInputMode('density')}
-                      className={`px-2.5 py-1 rounded-md transition-colors font-semibold ${
-                        warpInputMode === 'density'
-                          ? 'bg-indigo-600 text-white'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                      }`}
-                    >
-                      إدخال الكثافة (خيوط/سم)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setWarpInputMode('totalEnds')}
-                      className={`px-2.5 py-1 rounded-md transition-colors font-semibold ${
-                        warpInputMode === 'totalEnds'
-                          ? 'bg-indigo-600 text-white'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                      }`}
-                    >
-                      إدخال العدد الكلي للخيوط
-                    </button>
-                  </div>
+              {/* Warp Inputs: Either Density or Total Ends (Auto calculated based on Reed Width) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    كثافة السداء في المشط (خيوط/سم)
+                    <span className="text-[11px] text-slate-400 font-normal mr-1">(اختياري)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={warpDensity}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Number(e.target.value);
+                      setWarpDensity(val);
+                      if (val !== '' && Number(reedWidth) > 0) {
+                        setTotalWarpEnds(Math.round(Number(val) * Number(reedWidth)));
+                      } else if (val === '') {
+                        setTotalWarpEnds('');
+                      }
+                    }}
+                    placeholder="مثال: 32"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
-                      <span>كثافة السداء (خيوط/سم - Warp Density)</span>
-                      {warpInputMode === 'totalEnds' && (
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">محسوب تلقائياً</span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={warpDensity}
-                        onChange={(e) => handleWarpDensityChange(Number(e.target.value))}
-                        required
-                        className={`w-full px-3 py-2 text-sm rounded-xl border ${
-                          warpInputMode === 'density'
-                            ? 'bg-white dark:bg-slate-900 border-indigo-500 font-bold text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20'
-                            : 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                        }`}
-                      />
-                      <span className="absolute left-3 top-2 text-xs text-slate-400">خيط/سم</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
-                      <span>إجمالي عدد خيوط السداء الكلي (Total Ends)</span>
-                      {warpInputMode === 'density' && (
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">محسوب تلقائياً</span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={totalWarpEnds}
-                        onChange={(e) => handleTotalWarpEndsChange(Number(e.target.value))}
-                        required
-                        className={`w-full px-3 py-2 text-sm rounded-xl border ${
-                          warpInputMode === 'totalEnds'
-                            ? 'bg-white dark:bg-slate-900 border-indigo-500 font-bold text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20'
-                            : 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                        }`}
-                      />
-                      <span className="absolute left-3 top-2 text-xs text-slate-400">خيط</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-lg bg-indigo-100/50 dark:bg-indigo-950/40 text-[11px] text-indigo-800 dark:text-indigo-200 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <ArrowLeftRight className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>المعادلة المعتمدة:</span>
-                  </span>
-                  <strong>
-                    إجمالي الخيوط ({totalWarpEnds.toLocaleString()} خيط) = الكثافة ({warpDensity} خيط/سم) × عرض القماش ({fabricWidth} سم)
-                  </strong>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    عدد خيوط السداء الكلي
+                    <span className="text-[11px] text-slate-400 font-normal mr-1">(اختياري)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={totalWarpEnds}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? '' : Number(e.target.value);
+                      setTotalWarpEnds(val);
+                      if (val !== '' && Number(reedWidth) > 0) {
+                        setWarpDensity(Number((Number(val) / Number(reedWidth)).toFixed(2)));
+                      } else if (val === '') {
+                        setWarpDensity('');
+                      }
+                    }}
+                    placeholder="مثال: 7040"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  />
                 </div>
               </div>
 

@@ -588,9 +588,10 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
   if (endpoint === '/api/fabric-items') {
     if (method === 'GET') return db.fabricItems;
     if (method === 'POST') {
+      const rWidth = Number(body.reedWidth) || 220;
       const fWidth = Number(body.fabricWidth) || 190;
       const wDensity = Number(body.warpDensity) || 30;
-      const ends = Number(body.totalWarpEnds) || Math.round(wDensity * fWidth);
+      const ends = Number(body.totalWarpEnds) || Math.round(wDensity * rWidth);
       const newFab: FabricItem = {
         id: `fab-${Date.now()}`,
         code: body.code,
@@ -600,7 +601,7 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
         warpDensity: wDensity,
         totalWarpEnds: ends,
         weftDensity: Number(body.weftDensity) || 20,
-        reedWidth: Number(body.reedWidth) || 220,
+        reedWidth: rWidth,
         fabricWidth: fWidth,
         requiredRpm: Number(body.requiredRpm) || 550,
         warpYarnCount: body.warpYarnCount || '',
