@@ -1,0 +1,6 @@
+{
+  "name": "نظام إدارة إنتاج قسم النسيج",
+  "description": "نظام ERP مصغر وحقيقي لإدارة وتتبع إنتاج الأنوال، الصالات، الأصناف وأوامر الإنتاج في معامل النسيج",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
