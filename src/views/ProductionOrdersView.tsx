@@ -355,34 +355,116 @@ export const ProductionOrdersView: React.FC<ProductionOrdersViewProps> = ({
 
               {/* Loom Assignment Selection Box */}
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-                <label className="block text-xs font-bold text-slate-800 dark:text-white">
-                  اختر الأنوال المخصصة لإنتاج هذا الصنف:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {looms.map((loom) => {
-                    const isSelected = assignedLoomIds.includes(loom.id);
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 dark:text-white">
+                      اختر الأنوال المخصصة لتشغيل هذا الصنف:
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      تم اختيار ({assignedLoomIds.length}) من أصل ({looms.length}) نول
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const targetLooms = hallId ? looms.filter((l) => l.hallId === hallId) : looms;
+                        setAssignedLoomIds(targetLooms.map((l) => l.id));
+                      }}
+                      className="px-2.5 py-1 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-semibold transition-colors"
+                    >
+                      تحديد الكل {hallId ? 'بالصالة' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAssignedLoomIds([])}
+                      className="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold transition-colors"
+                    >
+                      إلغاء التحديد
+                    </button>
+                  </div>
+                </div>
+
+                {/* Looms Filter Tabs / Hall Quick Selector */}
+                {halls.length > 0 && (
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-700 flex-wrap">
+                    <span className="text-[10px] text-slate-400 font-semibold">تحديد سريع حسب الصالة:</span>
+                    {halls.map((h) => {
+                      const hallLooms = looms.filter((l) => l.hallId === h.id);
+                      const allHallSelected = hallLooms.length > 0 && hallLooms.every((l) => assignedLoomIds.includes(l.id));
+                      return (
+                        <button
+                          key={h.id}
+                          type="button"
+                          onClick={() => {
+                            const hallLoomIds = hallLooms.map((l) => l.id);
+                            if (allHallSelected) {
+                              setAssignedLoomIds(assignedLoomIds.filter((id) => !hallLoomIds.includes(id)));
+                            } else {
+                              const newIds = Array.from(new Set([...assignedLoomIds, ...hallLoomIds]));
+                              setAssignedLoomIds(newIds);
+                            }
+                          }}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-medium border transition-colors ${
+                            allHallSelected
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'
+                          }`}
+                        >
+                          {h.name} ({hallLooms.length} نول)
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Looms Scrollable Selection Grid */}
+                <div className="max-h-64 overflow-y-auto pr-1 space-y-3 p-1 rounded-lg border border-slate-200/80 dark:border-slate-700/80 bg-white/70 dark:bg-slate-900/70">
+                  {halls.map((hall) => {
+                    const hallLooms = looms.filter((l) => l.hallId === hall.id);
+                    if (hallLooms.length === 0) return null;
+
                     return (
-                      <button
-                        type="button"
-                        key={loom.id}
-                        onClick={() => toggleLoomSelection(loom.id)}
-                        className={`p-2.5 rounded-xl border text-xs text-right transition-all flex items-center justify-between ${
-                          isSelected
-                            ? 'bg-indigo-50 dark:bg-indigo-950/80 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold'
-                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        <div>
-                          <span>نول {loom.loomNumber} ({loom.code})</span>
-                          <span className="block text-[10px] text-slate-400 font-normal">{loom.hallName}</span>
+                      <div key={hall.id} className="space-y-1.5">
+                        <div className="sticky top-0 z-10 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-700 dark:text-slate-200 flex justify-between items-center">
+                          <span>{hall.name} ({hallLooms.length} نول)</span>
+                          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
+                            المختار: {hallLooms.filter((l) => assignedLoomIds.includes(l.id)).length}
+                          </span>
                         </div>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />}
-                      </button>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 p-1">
+                          {hallLooms.map((loom) => {
+                            const isSelected = assignedLoomIds.includes(loom.id);
+                            return (
+                              <button
+                                type="button"
+                                key={loom.id}
+                                onClick={() => toggleLoomSelection(loom.id)}
+                                className={`p-2 rounded-xl border text-xs text-right transition-all flex items-center justify-between ${
+                                  isSelected
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/80 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs'
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                                }`}
+                              >
+                                <div className="truncate">
+                                  <span className="block font-semibold">نول {loom.loomNumber}</span>
+                                  <span className="block text-[10px] text-slate-400 font-normal">{loom.code}</span>
+                                </div>
+                                {isSelected ? (
+                                  <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mr-1" />
+                                ) : (
+                                  <div className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0 mr-1" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
 
-                <div className="pt-2 text-xs text-slate-600 dark:text-slate-300 flex justify-between">
+                <div className="pt-2 text-xs text-slate-600 dark:text-slate-300 flex justify-between border-t border-slate-200 dark:border-slate-700">
                   <span>مجموع الإنتاج اليومي المتوقع للأنوال المختارة:</span>
                   <strong className="text-emerald-600 font-bold">{totalDailyRate.toLocaleString()} متر/يوم</strong>
                 </div>
