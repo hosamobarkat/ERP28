@@ -136,7 +136,6 @@ const MainAppContent: React.FC = () => {
           searchTerm={searchTerm}
           isDarkMode={isDarkMode}
           toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-          onOpenChangePassword={() => setIsPasswordModalOpen(true)}
           notificationsCount={activeNotifsCount}
           onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
         />
@@ -213,7 +212,14 @@ const MainAppContent: React.FC = () => {
             />
           )}
 
-          {activeTab === 'users' && <UsersView users={users} halls={halls} onRefresh={fetchAllData} />}
+          {activeTab === 'users' && (
+            <UsersView
+              users={users}
+              halls={halls}
+              onRefresh={fetchAllData}
+              onOpenChangePassword={() => setIsPasswordModalOpen(true)}
+            />
+          )}
 
           {activeTab === 'audit' && <AuditLogView />}
 

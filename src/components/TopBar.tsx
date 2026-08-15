@@ -11,7 +11,6 @@ interface TopBarProps {
   searchTerm: string;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  onOpenChangePassword: () => void;
   notificationsCount: number;
   onToggleNotifications: () => void;
 }
@@ -24,7 +23,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   searchTerm,
   isDarkMode,
   toggleDarkMode,
-  onOpenChangePassword,
   notificationsCount,
   onToggleNotifications,
 }) => {
@@ -139,16 +137,6 @@ export const TopBar: React.FC<TopBarProps> = ({
               {notificationsCount}
             </span>
           )}
-        </button>
-
-        {/* Change Password Button */}
-        <button
-          onClick={onOpenChangePassword}
-          className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors hidden sm:flex items-center gap-1.5 text-xs font-semibold"
-          title="تغيير كلمة المرور"
-        >
-          <Key className="w-4 h-4 text-indigo-500" />
-          <span>تغيير كلمة المرور</span>
         </button>
       </div>
     </header>

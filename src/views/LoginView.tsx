@@ -22,9 +22,9 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
   {
     role: 'manager',
     username: 'admin',
-    title: 'مدير النظام (أدمن)',
-    subtitle: 'Manager',
-    description: 'كامل الصلاحيات لإدارة المصنع، الصالات، المستخدمين والإعدادات العامة',
+    title: 'مدير النظام',
+    subtitle: 'System Manager',
+    description: 'كامل الصلاحيات لإدارة الصالات، المجموعات، الأنوال، والمستخدمين',
     icon: Shield,
     badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     borderColor: 'border-purple-500/50',
@@ -35,9 +35,9 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
   {
     role: 'coordinator',
     username: 'coordinator',
-    title: 'منسق إنتاج',
+    title: 'منسق عام الإنتاج',
     subtitle: 'Production Coordinator',
-    description: 'تخطيط وإسناد أوامر الإنتاج ومتابعة مستهدف الكفاءة ونسب الإنجاز',
+    description: 'تخطيط وإسناد أوامر التشغيل ومتابعة مؤشرات الكفاءة والإنتاجية',
     icon: ClipboardList,
     badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
     borderColor: 'border-blue-500/50',
@@ -48,9 +48,9 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
   {
     role: 'hall_manager',
     username: 'hall_manager',
-    title: 'مدير الصالة',
-    subtitle: 'Hall Manager',
-    description: 'تسجيل الإنتاج اليومي للورديات وإدخال التوقفات والأعطال الخاصة بالصالة',
+    title: 'مدير صالة النسيج',
+    subtitle: 'Weaving Hall Manager',
+    description: 'تسجيل الإنتاج اليومي للورديات ومتابعة التوقفات وأداء الأنوال',
     icon: Factory,
     badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
     borderColor: 'border-teal-500/50',
@@ -63,7 +63,7 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
 export const LoginView: React.FC = () => {
   const { login } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>('manager');
-  const [password, setPassword] = useState('123789');
+  const [password, setPassword] = useState('');
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,7 +117,7 @@ export const LoginView: React.FC = () => {
           </div>
           <h1 className="text-2xl font-black text-white tracking-wide">نظام إدارة إنتاج قسم النسيج</h1>
           <p className="text-xs text-slate-400 mt-1 font-medium">
-            يرجى تحديد نوع الحساب ثم أدخل كلمة المرور (123789)
+            يرجى تحديد الشاغر الوظيفي ثم إدخال كلمة المرور للمتابعة
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export const LoginView: React.FC = () => {
           <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px]">1</span>
-              <span>حدد نوع الحساب (Account Type):</span>
+              <span>حدد الشاغر الوظيفي (Position):</span>
             </span>
             {step === 2 && (
               <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
@@ -198,9 +198,6 @@ export const LoginView: React.FC = () => {
               <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px]">2</span>
               <span>إدخال كلمة المرور (Password):</span>
             </span>
-            <span className="text-[11px] text-slate-400 font-mono">
-              الافتراضية: <strong className="text-indigo-400 font-bold">123789</strong>
-            </span>
           </div>
 
           {/* Selected Role Summary Bar */}
@@ -219,7 +216,7 @@ export const LoginView: React.FC = () => {
               onClick={() => setStep(1)}
               className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold hover:underline"
             >
-              تغيير الحساب
+              تغيير الشاغر
             </button>
           </div>
 
@@ -232,7 +229,7 @@ export const LoginView: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="أدخل كلمة المرور (123789)..."
+                placeholder="أدخل كلمة المرور الخاصة بالحساب..."
                 className="w-full pl-4 pr-10 py-3.5 text-sm bg-slate-800/90 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500 font-mono"
               />
             </div>
@@ -247,10 +244,6 @@ export const LoginView: React.FC = () => {
             <span>{loading ? 'جاري التحقق...' : `تسجيل الدخول كـ (${selectedAccount.title})`}</span>
           </button>
         </form>
-
-        <p className="text-center text-[11px] text-slate-500 mt-6">
-          جميع الحسابات تعمل بكلمة المرور الافتراضية <span className="font-mono text-slate-400">123789</span>
-        </p>
       </div>
     </div>
   );

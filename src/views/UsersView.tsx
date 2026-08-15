@@ -8,15 +8,16 @@ interface UsersViewProps {
   users: User[];
   halls: Hall[];
   onRefresh: () => void;
+  onOpenChangePassword?: () => void;
 }
 
-export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh }) => {
+export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh, onOpenChangePassword }) => {
   const { user: currentUser } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('123789');
+  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<UserRole>('hall_manager');
   const [assignedHallId, setAssignedHallId] = useState('');
@@ -27,7 +28,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh })
   const handleOpenAdd = () => {
     setEditingUser(null);
     setUsername(`user_${users.length + 1}`);
-    setPassword('123789');
+    setPassword('');
     setFullName(`شاغر وظيفي جديد ${users.length + 1}`);
     setRole('hall_manager');
     setAssignedHallId(halls.length > 0 ? halls[0].id : '');
@@ -97,30 +98,41 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh })
   const getRoleBadge = (r: UserRole) => {
     switch (r) {
       case 'manager':
-        return { label: 'مدير النظام (أدمن)', color: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' };
+        return { label: 'مدير النظام', color: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' };
       case 'coordinator':
-        return { label: 'منسق إنتاج', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' };
+        return { label: 'منسق عام الإنتاج', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' };
       case 'hall_manager':
-        return { label: 'مدير صالة', color: 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300' };
+        return { label: 'مدير صالة نسيج', color: 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300' };
     }
   };
 
   return (
     <div className="space-y-6 dir-rtl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white">إدارة المستخدمين والصلاحيات</h2>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white">إدارة الشواغر الوظيفية والمستخدمين</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            تعيين الأدوار وصلاحيات الوصول للصالات وتقييد الحذف والتعديل
+            تعيين الأدوار الوظيفية وصلاحيات الوصول وتغيير كلمة المرور
           </p>
         </div>
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>إضافة مستخدم جديد</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onOpenChangePassword && (
+            <button
+              onClick={onOpenChangePassword}
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-all shadow-xs"
+            >
+              <Key className="w-4 h-4 text-indigo-500" />
+              <span>تغيير كلمة المرور</span>
+            </button>
+          )}
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>إضافة شاغر وظيفي جديد</span>
+          </button>
+        </div>
       </div>
 
       {/* Users Grid */}

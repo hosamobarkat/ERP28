@@ -74,13 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'manager':
-        return { label: 'المدير العام', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300' };
+        return { label: 'مدير النظام', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300' };
       case 'coordinator':
-        return { label: 'منسق الإنتاج', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' };
+        return { label: 'منسق عام الإنتاج', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' };
       case 'hall_manager':
-        return { label: 'مدير الصالة', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300' };
+        return { label: 'مدير صالة النسيج', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300' };
       default:
-        return { label: 'مستخدم', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' };
+        return { label: 'شاغر وظيفي', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' };
     }
   };
 
