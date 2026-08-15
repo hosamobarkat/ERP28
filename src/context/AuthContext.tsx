@@ -24,11 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      // Clear legacy localStorage auto-login tokens if present
-      localStorage.removeItem('weaving_erp_token');
-      localStorage.removeItem('weaving_erp_user');
-
-      const saved = sessionStorage.getItem('weaving_erp_user');
+      const saved = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -36,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem('weaving_erp_token');
+      return sessionStorage.getItem('weaving_erp_token') || localStorage.getItem('weaving_erp_token');
     } catch {
       return null;
     }
@@ -44,40 +40,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
     if (token) {
       apiFetch('/api/auth/me')
         .then((res) => {
+          if (!isMounted) return;
           if (res?.user) {
             setUser(res.user);
             sessionStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
-          } else {
-            logout();
+            localStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
           }
         })
         .catch(() => {
-          logout();
+          // If offline or on Vercel without backend, keep existing user from storage if valid
+          const savedUser = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
+          if (!savedUser && isMounted) {
+            logout();
+          }
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
     } else {
       setLoading(false);
     }
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-    sessionStorage.setItem('weaving_erp_token', newToken);
-    sessionStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
+    try {
+      sessionStorage.setItem('weaving_erp_token', newToken);
+      sessionStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
+      localStorage.setItem('weaving_erp_token', newToken);
+      localStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
+    } catch {}
     setLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    sessionStorage.removeItem('weaving_erp_token');
-    sessionStorage.removeItem('weaving_erp_user');
-    localStorage.removeItem('weaving_erp_token');
-    localStorage.removeItem('weaving_erp_user');
+    try {
+      sessionStorage.removeItem('weaving_erp_token');
+      sessionStorage.removeItem('weaving_erp_user');
+      localStorage.removeItem('weaving_erp_token');
+      localStorage.removeItem('weaving_erp_user');
+    } catch {}
   };
 
   const hasRole = (...roles: UserRole[]): boolean => {

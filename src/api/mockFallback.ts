@@ -442,29 +442,39 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
   if (endpoint === '/api/auth/login' && method === 'POST') {
     const { password, role, username } = body;
     if (!password) throw new Error('يرجى إدخال كلمة المرور');
-    if (password !== '123789') throw new Error('كلمة المرور غير صحيحة (استخدم 123789)');
+    if (password !== '123789') throw new Error('كلمة المرور غير صحيحة');
 
-    let user = db.users.find((u) => u.role === role);
+    let user = role ? db.users.find((u) => u.role === role) : undefined;
     if (!user && username) {
       user = db.users.find((u) => u.username.toLowerCase() === username.toLowerCase());
     }
     if (!user) user = db.users[0];
 
     const token = `local-token-${Date.now()}`;
+    try {
+      sessionStorage.setItem('weaving_erp_token', token);
+      sessionStorage.setItem('weaving_erp_user', JSON.stringify(user));
+      localStorage.setItem('weaving_erp_token', token);
+      localStorage.setItem('weaving_erp_user', JSON.stringify(user));
+    } catch {}
+
     return { token, user };
   }
 
   // Auth Me
   if (endpoint === '/api/auth/me') {
-    const authHeader = options.headers ? (options.headers as any)['Authorization'] || (options.headers as any)['authorization'] : null;
-    if (!authHeader) {
-      throw new Error('غير مصرح - يرجى تسجيل الدخول');
+    let user: any = null;
+    try {
+      const saved = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
+      if (saved) {
+        user = JSON.parse(saved);
+      }
+    } catch {}
+
+    if (!user) {
+      user = db.users[0];
     }
-    const saved = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
-    if (!saved) {
-      throw new Error('جلسة العمل منتهية - يرجى تسجيل الدخول');
-    }
-    return { user: JSON.parse(saved) };
+    return { user };
   }
 
   // Halls

@@ -23,39 +23,41 @@ export async function apiFetch<T = any>(endpoint: string, options: RequestInit =
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  try {
-    const response = await fetch(endpoint, {
-      ...options,
-      headers,
-    });
+  const mergedOptions: RequestInit = {
+    ...options,
+    headers,
+  };
 
-    if (response.status === 401 && !endpoint.includes('/api/auth/login')) {
-      sessionStorage.removeItem('weaving_erp_token');
-      sessionStorage.removeItem('weaving_erp_user');
-      localStorage.removeItem('weaving_erp_token');
-      localStorage.removeItem('weaving_erp_user');
-    }
+  try {
+    const response = await fetch(endpoint, mergedOptions);
 
     const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
 
     // If server returned valid JSON
-    if (response.ok && contentType.includes('application/json')) {
+    if (response.ok && isJson) {
       const data = await response.json();
       return data as T;
     }
 
-    // If the server returned an error with JSON
-    if (!response.ok && contentType.includes('application/json')) {
-      const data = await response.json();
+    // If the server returned an explicit JSON error (like 401 Unauthorized or 400 Bad Request)
+    if (!response.ok && isJson) {
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401 && !endpoint.includes('/api/auth/login')) {
+        sessionStorage.removeItem('weaving_erp_token');
+        sessionStorage.removeItem('weaving_erp_user');
+        localStorage.removeItem('weaving_erp_token');
+        localStorage.removeItem('weaving_erp_user');
+      }
       throw new Error(data.error || 'حدث خطأ في النظام');
     }
 
-    // If response is HTML (Vercel static SPA rewrite returning index.html) or 404/500 without JSON:
-    return (await handleLocalMockRequest(endpoint, options)) as T;
+    // If response is HTML (e.g. Vercel static SPA rewrite returning index.html) or 404/405 without JSON:
+    return (await handleLocalMockRequest(endpoint, mergedOptions)) as T;
   } catch (err: any) {
-    // If fetch failed completely (network error, CORS, or static Vercel host)
+    // If fetch failed completely (network error, CORS, or static Vercel host without backend)
     try {
-      return (await handleLocalMockRequest(endpoint, options)) as T;
+      return (await handleLocalMockRequest(endpoint, mergedOptions)) as T;
     } catch (fallbackErr: any) {
       throw new Error(fallbackErr.message || err.message || 'حدث خطأ أثناء معالجة الطلب');
     }
