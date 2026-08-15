@@ -84,10 +84,11 @@ export interface FabricItem {
   weaveStructure: string; // التركيب النسيجي
   reedWidth: number; // عرض المشط cm
   fabricWidth: number; // عرض القماش cm
-  warpDensity: number; // كثافة السداء
+  warpDensity: number; // كثافة السداء (خيوط/سم)
+  totalWarpEnds?: number; // إجمالي عدد خيوط السداء الكلي
   weftDensity: number; // كثافة اللحمة (Picks/cm)
   requiredRpm: number; // سرعة النول المطلوبة
-  requiredProductionMeters: number; // الإنتاج المطلوب بالمتر
+  requiredProductionMeters?: number; // (اختياري / سابق)
   startDate?: string;
   targetDeliveryDate?: string;
   notes?: string;

@@ -364,13 +364,17 @@ app.get('/api/fabric-items', requireAuth, (req: AuthRequest, res: Response) => {
 });
 
 app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator'), (req: AuthRequest, res: Response) => {
-  const { code, name, description, warpYarnCount, weftYarnCount, yarnType, weaveStructure, reedWidth, fabricWidth, warpDensity, weftDensity, requiredRpm, requiredProductionMeters, startDate, targetDeliveryDate, notes } = req.body;
+  const { code, name, description, warpYarnCount, weftYarnCount, yarnType, weaveStructure, reedWidth, fabricWidth, warpDensity, totalWarpEnds, weftDensity, requiredRpm, notes } = req.body;
 
   if (!code || !name || !weftDensity) {
     return res.status(400).json({ error: 'يرجى تزويد كود الصنف واسم الصنف وكثافة اللحمة Picks/cm' });
   }
 
   const db = loadDatabase();
+  const fWidth = Number(fabricWidth) || 190;
+  const wDensity = Number(warpDensity) || 30;
+  const ends = Number(totalWarpEnds) || Math.round(wDensity * fWidth);
+
   const newItem = {
     id: `fab-${Date.now()}`,
     code,
@@ -380,14 +384,12 @@ app.post('/api/fabric-items', requireAuth, requireRole('manager', 'coordinator')
     weftYarnCount: weftYarnCount || '',
     yarnType: yarnType || '',
     weaveStructure: weaveStructure || '',
-    reedWidth: Number(reedWidth) || 200,
-    fabricWidth: Number(fabricWidth) || 180,
-    warpDensity: Number(warpDensity) || 30,
+    reedWidth: Number(reedWidth) || 220,
+    fabricWidth: fWidth,
+    warpDensity: wDensity,
+    totalWarpEnds: ends,
     weftDensity: Number(weftDensity),
-    requiredRpm: Number(requiredRpm) || 500,
-    requiredProductionMeters: Number(requiredProductionMeters) || 10000,
-    startDate,
-    targetDeliveryDate,
+    requiredRpm: Number(requiredRpm) || 550,
     notes: notes || '',
     createdAt: new Date().toISOString(),
   };

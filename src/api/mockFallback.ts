@@ -202,11 +202,9 @@ const getInitialData = (): LocalDB => {
       reedWidth: 220,
       fabricWidth: 190,
       warpDensity: 32,
+      totalWarpEnds: 6080,
       weftDensity: 20,
       requiredRpm: 560,
-      requiredProductionMeters: 100000,
-      startDate: '2026-08-01',
-      targetDeliveryDate: '2026-09-30',
       notes: 'صالة النسيج الخامي - 42 نول بيكانول اوبتي ماكس 2017',
       createdAt: new Date().toISOString(),
     },
@@ -222,11 +220,9 @@ const getInitialData = (): LocalDB => {
       reedWidth: 220,
       fabricWidth: 180,
       warpDensity: 26,
+      totalWarpEnds: 4680,
       weftDensity: 18,
       requiredRpm: 540,
-      requiredProductionMeters: 150000,
-      startDate: '2026-08-05',
-      targetDeliveryDate: '2026-10-15',
       notes: 'صالة الجينز - 54 نول بيكانول اوبتي ماكس 2017',
       createdAt: new Date().toISOString(),
     },
@@ -592,18 +588,21 @@ export async function handleLocalMockRequest(endpoint: string, options: RequestI
   if (endpoint === '/api/fabric-items') {
     if (method === 'GET') return db.fabricItems;
     if (method === 'POST') {
+      const fWidth = Number(body.fabricWidth) || 190;
+      const wDensity = Number(body.warpDensity) || 30;
+      const ends = Number(body.totalWarpEnds) || Math.round(wDensity * fWidth);
       const newFab: FabricItem = {
         id: `fab-${Date.now()}`,
         code: body.code,
         name: body.name,
         weaveStructure: body.weaveStructure || 'سادة 1/1',
         yarnType: body.yarnType || 'قطن',
-        warpDensity: Number(body.warpDensity) || 30,
+        warpDensity: wDensity,
+        totalWarpEnds: ends,
         weftDensity: Number(body.weftDensity) || 20,
         reedWidth: Number(body.reedWidth) || 220,
-        fabricWidth: Number(body.fabricWidth) || 190,
-        requiredRpm: Number(body.requiredRpm) || 500,
-        requiredProductionMeters: Number(body.requiredProductionMeters) || 5000,
+        fabricWidth: fWidth,
+        requiredRpm: Number(body.requiredRpm) || 550,
         warpYarnCount: body.warpYarnCount || '',
         weftYarnCount: body.weftYarnCount || '',
         notes: body.notes || '',
