@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User, UserRole } from '../types';
-import { apiFetch } from '../api/client';
+import { setAuthToken } from '../api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -22,71 +22,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-  const [token, setToken] = useState<string | null>(() => {
-    try {
-      return sessionStorage.getItem('weaving_erp_token') || localStorage.getItem('weaving_erp_token');
-    } catch {
-      return null;
-    }
-  });
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    if (token) {
-      apiFetch('/api/auth/me')
-        .then((res) => {
-          if (!isMounted) return;
-          if (res?.user) {
-            setUser(res.user);
-            sessionStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
-            localStorage.setItem('weaving_erp_user', JSON.stringify(res.user));
-          }
-        })
-        .catch(() => {
-          // If offline or on Vercel without backend, keep existing user from storage if valid
-          const savedUser = sessionStorage.getItem('weaving_erp_user') || localStorage.getItem('weaving_erp_user');
-          if (!savedUser && isMounted) {
-            logout();
-          }
-        })
-        .finally(() => {
-          if (isMounted) setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [token]);
+  // Always start with null user and token so login is required on initial link open and upon refresh
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-    try {
-      sessionStorage.setItem('weaving_erp_token', newToken);
-      sessionStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
-      localStorage.setItem('weaving_erp_token', newToken);
-      localStorage.setItem('weaving_erp_user', JSON.stringify(newUser));
-    } catch {}
+    setAuthToken(newToken);
     setLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    setAuthToken(null);
     try {
-      sessionStorage.removeItem('weaving_erp_token');
-      sessionStorage.removeItem('weaving_erp_user');
+      sessionStorage.clear();
       localStorage.removeItem('weaving_erp_token');
       localStorage.removeItem('weaving_erp_user');
     } catch {}
@@ -138,3 +91,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
