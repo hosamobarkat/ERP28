@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Sun, Moon, Key, UserCheck, Clock, ShieldAlert } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { NavTab } from '../types';
+import { Search, Bell, Sun, Moon, Clock, Cpu, Boxes } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import { ProductionNavTab } from '../../../types';
 
 interface TopBarProps {
   collapsed: boolean;
-  activeTab: NavTab;
-  setActiveTab: (tab: NavTab) => void;
+  activeTab: ProductionNavTab;
+  setActiveTab: (tab: ProductionNavTab) => void;
   onSearch: (term: string) => void;
   searchTerm: string;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   notificationsCount: number;
   onToggleNotifications: () => void;
+  onSwitchToWarehouse: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
   collapsed,
   activeTab,
-  setActiveTab,
   onSearch,
   searchTerm,
   isDarkMode,
   toggleDarkMode,
   notificationsCount,
   onToggleNotifications,
+  onSwitchToWarehouse,
 }) => {
   const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -48,7 +49,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  const getTabTitle = (tab: NavTab) => {
+  const getTabTitle = (tab: ProductionNavTab) => {
     switch (tab) {
       case 'dashboard':
         return 'لوحة التحكم الرئيسية والتحليلات';
@@ -57,7 +58,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       case 'groups':
         return 'إدارة مجموعات الأنوال';
       case 'looms':
-        return 'سجل وبيانات الأنوال الإلكترونية';
+        return 'سجل وبيانات الأنوال الإلكترونية (96 نول)';
       case 'fabrics':
         return 'دليل الأصناف والتراكيب النسيجية';
       case 'orders':
@@ -77,22 +78,28 @@ export const TopBar: React.FC<TopBarProps> = ({
       case 'settings':
         return 'إعدادات النظام العامة';
       default:
-        return 'نظام ادارة الانتاج';
+        return 'نظام إدارة إنتاج الأنوال';
     }
   };
 
   return (
     <header
-      className={`fixed top-0 left-0 z-20 h-20 transition-all duration-300 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between ${
+      className={`fixed top-0 left-0 z-20 h-20 transition-all duration-300 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between ${
         collapsed ? 'right-20' : 'right-72'
       }`}
     >
-      {/* Title & Live Time */}
+      {/* Title & Live Time & Current Module Badge */}
       <div className="flex items-center gap-4">
         <div>
-          <h2 className="font-bold text-lg text-slate-800 dark:text-white leading-snug">
-            {getTabTitle(activeTab)}
-          </h2>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">
+              <Cpu className="w-3.5 h-3.5" />
+              نظام إنتاج النسيج
+            </span>
+            <h2 className="font-bold text-base sm:text-lg text-slate-800 dark:text-white leading-snug">
+              {getTabTitle(activeTab)}
+            </h2>
+          </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             <Clock className="w-3.5 h-3.5 text-indigo-500" />
             <span>{currentTime}</span>
@@ -115,11 +122,21 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Quick Action Icons & Profile */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Module Switcher button */}
+        <button
+          onClick={onSwitchToWarehouse}
+          className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-xs font-bold transition-all shadow-xs cursor-pointer"
+          title="الانتقال إلى نظام مستودع الغزول"
+        >
+          <Boxes className="w-4 h-4 text-indigo-500" />
+          <span>مستودع الغزول</span>
+        </button>
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
-          className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           title={isDarkMode ? 'تفعيل الوضع المضيء' : 'تفعيل الوضع الليلي'}
         >
           {isDarkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-600" />}
@@ -128,7 +145,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Notifications Drawer Toggle */}
         <button
           onClick={onToggleNotifications}
-          className="relative p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="relative p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           title="التنبيهات الإدارية"
         >
           <Bell className="w-5 h-5" />

@@ -3,20 +3,27 @@ import { FileText, Download, Printer, Filter, Calendar, Cpu, Layers } from 'luci
 import { ProductionEntry, Hall, Loom, FabricItem, ProductionOrder } from '../types';
 
 interface ReportsViewProps {
-  entries: ProductionEntry[];
-  halls: Hall[];
-  looms: Loom[];
-  fabrics: FabricItem[];
-  orders: ProductionOrder[];
+  entries?: ProductionEntry[];
+  halls?: Hall[];
+  looms?: Loom[];
+  fabrics?: FabricItem[];
+  orders?: ProductionOrder[];
+  stoppages?: any[];
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({
-  entries,
-  halls,
-  looms,
-  fabrics,
-  orders,
+  entries = [],
+  halls = [],
+  looms = [],
+  fabrics = [],
+  orders = [],
 }) => {
+  const safeEntries = entries || [];
+  const safeHalls = halls || [];
+  const safeLooms = looms || [];
+  const safeFabrics = fabrics || [];
+  const safeOrders = orders || [];
+
   const [selectedHall, setSelectedHall] = useState('all');
   const [selectedLoom, setSelectedLoom] = useState('all');
   const [selectedShift, setSelectedShift] = useState('all');
@@ -25,8 +32,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   const [endDate, setEndDate] = useState('');
 
   // Filter entries
-  const filteredEntries = entries.filter((e) => {
-    if (selectedHall !== 'all' && e.hallName !== halls.find((h) => h.id === selectedHall)?.name) return false;
+  const filteredEntries = safeEntries.filter((e) => {
+    if (selectedHall !== 'all' && e.hallName !== safeHalls.find((h) => h.id === selectedHall)?.name) return false;
     if (selectedLoom !== 'all' && e.loomId !== selectedLoom) return false;
     if (selectedShift !== 'all' && e.shift !== selectedShift) return false;
     if (selectedFabric !== 'all' && e.fabricItemId !== selectedFabric) return false;
@@ -136,7 +143,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
             >
               <option value="all">الكل</option>
-              {halls.map((h) => (
+              {safeHalls.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name}
                 </option>
@@ -152,7 +159,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
             >
               <option value="all">جميع الأنوال</option>
-              {looms.map((l) => (
+              {safeLooms.map((l) => (
                 <option key={l.id} value={l.id}>
                   نول {l.loomNumber}
                 </option>
@@ -182,7 +189,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
             >
               <option value="all">جميع الأصناف</option>
-              {fabrics.map((f) => (
+              {safeFabrics.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
                 </option>

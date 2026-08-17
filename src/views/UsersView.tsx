@@ -5,14 +5,16 @@ import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 
 interface UsersViewProps {
-  users: User[];
-  halls: Hall[];
+  users?: User[];
+  halls?: Hall[];
   onRefresh: () => void;
   onOpenChangePassword?: () => void;
 }
 
-export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh, onOpenChangePassword }) => {
+export const UsersView: React.FC<UsersViewProps> = ({ users = [], halls = [], onRefresh, onOpenChangePassword }) => {
   const { user: currentUser } = useAuth();
+  const safeUsers = users || [];
+  const safeHalls = halls || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -27,11 +29,11 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh, o
 
   const handleOpenAdd = () => {
     setEditingUser(null);
-    setUsername(`user_${users.length + 1}`);
+    setUsername(`user_${safeUsers.length + 1}`);
     setPassword('');
-    setFullName(`شاغر وظيفي جديد ${users.length + 1}`);
+    setFullName(`شاغر وظيفي جديد ${safeUsers.length + 1}`);
     setRole('hall_manager');
-    setAssignedHallId(halls.length > 0 ? halls[0].id : '');
+    setAssignedHallId(safeHalls.length > 0 ? safeHalls[0].id : '');
     setError('');
     setIsModalOpen(true);
   };
@@ -137,9 +139,9 @@ export const UsersView: React.FC<UsersViewProps> = ({ users, halls, onRefresh, o
 
       {/* Users Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {users.map((u) => {
+        {safeUsers.map((u) => {
           const rBadge = getRoleBadge(u.role);
-          const assignedHall = halls.find((h) => h.id === u.assignedHallId);
+          const assignedHall = safeHalls.find((h) => h.id === u.assignedHallId);
 
           return (
             <div

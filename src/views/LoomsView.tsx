@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import { Cpu, Plus, Edit2, Trash2, AlertCircle, X, CheckCircle2, PauseCircle, Wrench, Slash, Layers } from 'lucide-react';
-import { Loom, Hall, LoomGroup, LoomStatus } from '../types';
+import { Loom, Hall, LoomGroup, LoomStatus, FabricItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 
 interface LoomsViewProps {
-  looms: Loom[];
-  halls: Hall[];
-  groups: LoomGroup[];
+  looms?: Loom[];
+  halls?: Hall[];
+  groups?: LoomGroup[];
+  fabrics?: FabricItem[];
+  searchTerm?: string;
   onRefresh: () => void;
 }
 
-export const LoomsView: React.FC<LoomsViewProps> = ({ looms, halls, groups, onRefresh }) => {
+export const LoomsView: React.FC<LoomsViewProps> = ({
+  looms = [],
+  halls = [],
+  groups = [],
+  fabrics = [],
+  searchTerm = '',
+  onRefresh,
+}) => {
   const { canEditLoom, canDeleteRecords } = useAuth();
+  const safeLooms = looms || [];
+  const safeHalls = halls || [];
+  const safeGroups = groups || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLoom, setEditingLoom] = useState<Loom | null>(null);
 
@@ -31,13 +44,26 @@ export const LoomsView: React.FC<LoomsViewProps> = ({ looms, halls, groups, onRe
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const filteredLooms = safeLooms.filter((l) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      l.loomNumber.toLowerCase().includes(term) ||
+      l.code.toLowerCase().includes(term) ||
+      (l.hallName && l.hallName.toLowerCase().includes(term)) ||
+      (l.groupName && l.groupName.toLowerCase().includes(term)) ||
+      (l.currentFabricName && l.currentFabricName.toLowerCase().includes(term)) ||
+      (l.notes && l.notes.toLowerCase().includes(term))
+    );
+  });
+
   const handleOpenAdd = () => {
     setEditingLoom(null);
-    const nextNum = looms.length + 1;
+    const nextNum = safeLooms.length + 1;
     setLoomNumber(String(nextNum));
     setCode(`PC-${String(nextNum).padStart(2, '0')}`);
-    setHallId(halls.length > 0 ? halls[0].id : '');
-    setGroupId(groups.length > 0 ? groups[0].id : '');
+    setHallId(safeHalls.length > 0 ? safeHalls[0].id : '');
+    setGroupId(safeGroups.length > 0 ? safeGroups[0].id : '');
     setManufacturer('Picanol');
     setModel('OptiMax-i-4-R 2017');
     setYear('2017');
@@ -154,7 +180,7 @@ export const LoomsView: React.FC<LoomsViewProps> = ({ looms, halls, groups, onRe
 
       {/* Looms Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {looms.map((loom) => {
+        {filteredLooms.map((loom) => {
           const stInfo = getStatusBadge(loom.status);
           const Icon = stInfo.icon;
 

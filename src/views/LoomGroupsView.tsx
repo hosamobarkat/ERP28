@@ -5,13 +5,16 @@ import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 
 interface LoomGroupsViewProps {
-  groups: LoomGroup[];
-  halls: Hall[];
+  groups?: LoomGroup[];
+  halls?: Hall[];
+  looms?: any[];
   onRefresh: () => void;
 }
 
-export const LoomGroupsView: React.FC<LoomGroupsViewProps> = ({ groups, halls, onRefresh }) => {
+export const LoomGroupsView: React.FC<LoomGroupsViewProps> = ({ groups = [], halls = [], onRefresh }) => {
   const { canEditLoom, canDeleteRecords } = useAuth();
+  const safeGroups = groups || [];
+  const safeHalls = halls || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<LoomGroup | null>(null);
 
@@ -23,8 +26,8 @@ export const LoomGroupsView: React.FC<LoomGroupsViewProps> = ({ groups, halls, o
 
   const handleOpenAdd = () => {
     setEditingGroup(null);
-    setHallId(halls.length > 0 ? halls[0].id : '');
-    setName(`المجموعة ${String.fromCharCode(65 + groups.length)}`);
+    setHallId(safeHalls.length > 0 ? safeHalls[0].id : '');
+    setName(`المجموعة ${String.fromCharCode(65 + safeGroups.length)}`);
     setDescription('');
     setError('');
     setIsModalOpen(true);
@@ -96,7 +99,7 @@ export const LoomGroupsView: React.FC<LoomGroupsViewProps> = ({ groups, halls, o
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {groups.map((grp) => (
+        {safeGroups.map((grp) => (
           <div
             key={grp.id}
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"

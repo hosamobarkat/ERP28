@@ -5,20 +5,25 @@ import { apiFetch } from '../api/client';
 import { ProductionCalculator, EfficiencyCalculator } from '../businessLogic/calculators';
 
 interface ProductionEntryViewProps {
-  entries: ProductionEntry[];
-  looms: Loom[];
-  orders: ProductionOrder[];
-  fabrics: FabricItem[];
+  entries?: ProductionEntry[];
+  looms?: Loom[];
+  orders?: ProductionOrder[];
+  fabrics?: FabricItem[];
   onRefresh: () => void;
 }
 
 export const ProductionEntryView: React.FC<ProductionEntryViewProps> = ({
-  entries,
-  looms,
-  orders,
-  fabrics,
+  entries = [],
+  looms = [],
+  orders = [],
+  fabrics = [],
   onRefresh,
 }) => {
+  const safeEntries = entries || [];
+  const safeLooms = looms || [];
+  const safeOrders = orders || [];
+  const safeFabrics = fabrics || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -34,9 +39,9 @@ export const ProductionEntryView: React.FC<ProductionEntryViewProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const selectedLoom = looms.find((l) => l.id === loomId);
-  const selectedOrder = orders.find((o) => o.id === productionOrderId);
-  const selectedFabric = fabrics.find((f) => f.id === (selectedOrder ? selectedOrder.fabricItemId : ''));
+  const selectedLoom = safeLooms.find((l) => l.id === loomId);
+  const selectedOrder = safeOrders.find((o) => o.id === productionOrderId);
+  const selectedFabric = safeFabrics.find((f) => f.id === (selectedOrder ? selectedOrder.fabricItemId : ''));
 
   // Live Auto Calculations
   const rpm = selectedLoom ? selectedLoom.rpm : 500;
@@ -46,9 +51,10 @@ export const ProductionEntryView: React.FC<ProductionEntryViewProps> = ({
 
   const handleOpenAdd = () => {
     setDate(todayStr);
-    const firstLoom = looms.length > 0 ? looms[0].id : '';
+    const firstLoom = safeLooms.length > 0 ? safeLooms[0].id : '';
     setLoomId(firstLoom);
-    setProductionOrderId(orders.length > 0 ? orders[0].id : '');
+    const firstOrder = safeOrders.length > 0 ? safeOrders[0].id : '';
+    setProductionOrderId(firstOrder);
     setShift('shift_1');
     setOperatingHours(8);
     setDowntimeHours(0);
@@ -133,7 +139,7 @@ export const ProductionEntryView: React.FC<ProductionEntryViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {entries.map((entry) => (
+              {safeEntries.map((entry) => (
                 <tr key={entry.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                   <td className="p-3.5">
                     <span className="font-bold text-slate-800 dark:text-white block">{entry.date}</span>

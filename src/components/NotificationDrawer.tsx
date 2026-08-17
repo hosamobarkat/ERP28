@@ -5,23 +5,26 @@ import { Loom, ProductionOrder } from '../types';
 interface NotificationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  looms: Loom[];
-  orders: ProductionOrder[];
+  looms?: Loom[];
+  orders?: ProductionOrder[];
   onSelectTab: (tab: any) => void;
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   isOpen,
   onClose,
-  looms,
-  orders,
+  looms = [],
+  orders = [],
   onSelectTab,
 }) => {
   if (!isOpen) return null;
 
-  const stoppedLooms = looms.filter((l) => l.status === 'stopped' || l.status === 'maintenance');
-  const delayedOrders = orders.filter((o) => o.status === 'delayed');
-  const nearCompletionOrders = orders.filter(
+  const safeLooms = looms || [];
+  const safeOrders = orders || [];
+
+  const stoppedLooms = safeLooms.filter((l) => l.status === 'stopped' || l.status === 'maintenance');
+  const delayedOrders = safeOrders.filter((o) => o.status === 'delayed');
+  const nearCompletionOrders = safeOrders.filter(
     (o) =>
       o.status === 'in_progress' &&
       o.requiredQuantityMeters > 0 &&

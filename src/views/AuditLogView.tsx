@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { History, Shield, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
-export const AuditLogView: React.FC = () => {
-  const [logs, setLogs] = useState<any[]>([]);
+interface AuditLogViewProps {
+  logs?: any[];
+}
+
+export const AuditLogView: React.FC<AuditLogViewProps> = ({ logs: initialLogs }) => {
+  const [logs, setLogs] = useState<any[]>(initialLogs || []);
   const [loading, setLoading] = useState(false);
 
   const fetchLogs = async () => {
     setLoading(true);
     try {
       const data = await apiFetch('/api/audit-logs');
-      setLogs(data);
+      setLogs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -19,8 +23,14 @@ export const AuditLogView: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    if (initialLogs && initialLogs.length > 0) {
+      setLogs(initialLogs);
+    } else {
+      fetchLogs();
+    }
+  }, [initialLogs]);
+
+  const safeLogs = Array.isArray(logs) ? logs : [];
 
   return (
     <div className="space-y-6 dir-rtl">
@@ -54,7 +64,7 @@ export const AuditLogView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {logs.map((log) => (
+              {safeLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                   <td className="p-3.5 font-mono text-slate-500">{new Date(log.timestamp).toLocaleString('ar-EG')}</td>
                   <td className="p-3.5 font-bold text-slate-800 dark:text-white">{log.username}</td>

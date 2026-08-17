@@ -5,12 +5,14 @@ import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 
 interface HallsViewProps {
-  halls: Hall[];
+  halls?: Hall[];
+  looms?: any[];
   onRefresh: () => void;
 }
 
-export const HallsView: React.FC<HallsViewProps> = ({ halls, onRefresh }) => {
+export const HallsView: React.FC<HallsViewProps> = ({ halls = [], onRefresh }) => {
   const { canEditLoom, canDeleteRecords } = useAuth();
+  const safeHalls = halls || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHall, setEditingHall] = useState<Hall | null>(null);
 
@@ -23,8 +25,8 @@ export const HallsView: React.FC<HallsViewProps> = ({ halls, onRefresh }) => {
 
   const handleOpenAdd = () => {
     setEditingHall(null);
-    setNumber(String(halls.length + 1));
-    setName(`صالة النسيج ${halls.length + 1}`);
+    setNumber(String(safeHalls.length + 1));
+    setName(`صالة النسيج ${safeHalls.length + 1}`);
     setDescription('');
     setNotes('');
     setError('');
@@ -100,7 +102,7 @@ export const HallsView: React.FC<HallsViewProps> = ({ halls, onRefresh }) => {
 
       {/* Halls Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {halls.map((hall) => (
+        {safeHalls.map((hall) => (
           <div
             key={hall.id}
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative flex flex-col justify-between"

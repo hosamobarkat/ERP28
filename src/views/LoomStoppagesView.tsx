@@ -6,17 +6,20 @@ import { apiFetch } from '../api/client';
 import { DowntimeCalculator } from '../businessLogic/calculators';
 
 interface LoomStoppagesViewProps {
-  stoppages: LoomStoppage[];
-  looms: Loom[];
+  stoppages?: LoomStoppage[];
+  looms?: Loom[];
   onRefresh: () => void;
 }
 
 export const LoomStoppagesView: React.FC<LoomStoppagesViewProps> = ({
-  stoppages,
-  looms,
+  stoppages = [],
+  looms = [],
   onRefresh,
 }) => {
   const { canDeleteRecords } = useAuth();
+  const safeStoppages = stoppages || [];
+  const safeLooms = looms || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -34,7 +37,7 @@ export const LoomStoppagesView: React.FC<LoomStoppagesViewProps> = ({
 
   const handleOpenAdd = () => {
     setDate(todayStr);
-    setLoomId(looms.length > 0 ? looms[0].id : '');
+    setLoomId(safeLooms.length > 0 ? safeLooms[0].id : '');
     setStartTime('08:00');
     setEndTime('09:30');
     setReason('mechanical');
@@ -138,7 +141,7 @@ export const LoomStoppagesView: React.FC<LoomStoppagesViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {stoppages.map((s) => (
+              {safeStoppages.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                   <td className="p-3.5">
                     <strong className="text-slate-800 dark:text-white font-bold block">نول {s.loomNumber}</strong>

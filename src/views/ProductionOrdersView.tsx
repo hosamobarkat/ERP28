@@ -6,21 +6,28 @@ import { apiFetch } from '../api/client';
 import { OrderCompletionCalculator, ProductionCalculator } from '../businessLogic/calculators';
 
 interface ProductionOrdersViewProps {
-  orders: ProductionOrder[];
-  fabrics: FabricItem[];
-  halls: Hall[];
-  looms: Loom[];
+  orders?: ProductionOrder[];
+  fabrics?: FabricItem[];
+  halls?: Hall[];
+  looms?: Loom[];
+  searchTerm?: string;
   onRefresh: () => void;
 }
 
 export const ProductionOrdersView: React.FC<ProductionOrdersViewProps> = ({
-  orders,
-  fabrics,
-  halls,
-  looms,
+  orders = [],
+  fabrics = [],
+  halls = [],
+  looms = [],
+  searchTerm = '',
   onRefresh,
 }) => {
   const { canEditLoom, canDeleteRecords } = useAuth();
+  const safeOrders = orders || [];
+  const safeFabrics = fabrics || [];
+  const safeHalls = halls || [];
+  const safeLooms = looms || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<ProductionOrder | null>(null);
 
@@ -36,17 +43,28 @@ export const ProductionOrdersView: React.FC<ProductionOrdersViewProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const filteredOrders = safeOrders.filter((po) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      po.orderNumber.toLowerCase().includes(term) ||
+      (po.fabricItemName && po.fabricItemName.toLowerCase().includes(term)) ||
+      (po.hallName && po.hallName.toLowerCase().includes(term)) ||
+      (po.notes && po.notes.toLowerCase().includes(term))
+    );
+  });
+
   const handleOpenAdd = () => {
     setEditingOrder(null);
-    setOrderNumber(`PO-2026-00${orders.length + 1}`);
-    setFabricItemId(fabrics.length > 0 ? fabrics[0].id : '');
+    setOrderNumber(`PO-2026-00${safeOrders.length + 1}`);
+    setFabricItemId(safeFabrics.length > 0 ? safeFabrics[0].id : '');
     setRequiredQuantityMeters(50000);
     setStartDate(new Date().toISOString().split('T')[0]);
     const future = new Date();
     future.setDate(future.getDate() + 45);
     setTargetDeliveryDate(future.toISOString().split('T')[0]);
-    setHallId(halls.length > 0 ? halls[0].id : '');
-    setAssignedLoomIds(looms.slice(0, 3).map((l) => l.id));
+    setHallId(safeHalls.length > 0 ? safeHalls[0].id : '');
+    setAssignedLoomIds(safeLooms.slice(0, 3).map((l) => l.id));
     setNotes('');
     setError('');
     setIsModalOpen(true);
@@ -122,8 +140,8 @@ export const ProductionOrdersView: React.FC<ProductionOrdersViewProps> = ({
   };
 
   // Helper calculation for assigned looms daily rate
-  const selectedLoomsList = looms.filter((l) => assignedLoomIds.includes(l.id));
-  const selectedFabric = fabrics.find((f) => f.id === fabricItemId);
+  const selectedLoomsList = safeLooms.filter((l) => assignedLoomIds.includes(l.id));
+  const selectedFabric = safeFabrics.find((f) => f.id === fabricItemId);
   const totalDailyRate = selectedLoomsList.reduce((sum, l) => {
     const picks = selectedFabric ? selectedFabric.weftDensity : l.picksPerCm;
     return sum + ProductionCalculator.expectedDailyMeters(l.rpm, picks, l.dailyOperatingHours, l.defaultEfficiencyPercent);
@@ -151,9 +169,9 @@ export const ProductionOrdersView: React.FC<ProductionOrdersViewProps> = ({
 
       {/* Orders Cards List */}
       <div className="space-y-4">
-        {orders.map((po) => {
-          const fabric = fabrics.find((f) => f.id === po.fabricItemId);
-          const assignedLooms = looms.filter((l) => po.assignedLoomIds?.includes(l.id));
+        {filteredOrders.map((po) => {
+          const fabric = safeFabrics.find((f) => f.id === po.fabricItemId);
+          const assignedLooms = safeLooms.filter((l) => po.assignedLoomIds?.includes(l.id));
 
           // Calculate daily rate for assigned looms
           const dailyRate = assignedLooms.reduce((sum, l) => {

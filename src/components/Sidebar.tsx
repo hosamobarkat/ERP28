@@ -1,188 +1,249 @@
 import React from 'react';
-import {
-  LayoutDashboard,
-  Building2,
-  Grid2X2,
+import { 
+  LayoutDashboard, 
+  ShoppingCart, 
+  Warehouse, 
+  ArrowUpRight, 
+  History, 
+  Lightbulb, 
+  ShieldAlert, 
+  Boxes,
+  MessageCircle,
+  X,
+  Database,
   Cpu,
-  Layers,
-  ClipboardList,
-  PenTool,
-  AlertOctagon,
-  Activity,
-  BarChart3,
-  Users,
-  ShieldCheck,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  ChevronRight
+  LogOut
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { WarehouseActiveTab } from '../types';
 
-export type NavTab =
-  | 'dashboard'
-  | 'halls'
-  | 'groups'
-  | 'looms'
-  | 'fabrics'
-  | 'orders'
-  | 'entry'
-  | 'stoppages'
-  | 'monitoring'
-  | 'reports'
-  | 'users'
-  | 'audit'
-  | 'settings';
+export type ActiveTab = WarehouseActiveTab;
 
 interface SidebarProps {
-  activeTab: NavTab;
-  setActiveTab: (tab: NavTab) => void;
-  collapsed: boolean;
-  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-  stoppedLoomsCount?: number;
-  delayedOrdersCount?: number;
+  activeTab: ActiveTab;
+  setActiveTab: (tab: ActiveTab) => void;
+  lowStockCount: number;
+  pendingPoCount: number;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+  onSwitchToProduction?: () => void;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
-  collapsed,
-  setCollapsed,
-  stoppedLoomsCount = 0,
-  delayedOrdersCount = 0,
+  lowStockCount,
+  pendingPoCount,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  onSwitchToProduction,
+  onLogout,
 }) => {
-  const { user, logout, hasRole } = useAuth();
-
-  const navItems = [
-    { id: 'dashboard' as NavTab, label: 'لوحة التحكم', icon: LayoutDashboard, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'halls' as NavTab, label: 'الصالات', icon: Building2, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'groups' as NavTab, label: 'مجموعات الأنوال', icon: Grid2X2, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'looms' as NavTab, label: 'الأنوال', icon: Cpu, roles: ['manager', 'coordinator', 'hall_manager'], badge: stoppedLoomsCount > 0 ? stoppedLoomsCount : undefined, badgeColor: 'bg-amber-500' },
-    { id: 'fabrics' as NavTab, label: 'الأصناف', icon: Layers, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'orders' as NavTab, label: 'أوامر الإنتاج', icon: ClipboardList, roles: ['manager', 'coordinator', 'hall_manager'], badge: delayedOrdersCount > 0 ? delayedOrdersCount : undefined, badgeColor: 'bg-rose-500' },
-    { id: 'entry' as NavTab, label: 'إدخال الإنتاج', icon: PenTool, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'stoppages' as NavTab, label: 'توقفات الأنوال', icon: AlertOctagon, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'monitoring' as NavTab, label: 'مراقبة الإنتاج', icon: Activity, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'reports' as NavTab, label: 'التقارير', icon: BarChart3, roles: ['manager', 'coordinator', 'hall_manager'] },
-    { id: 'users' as NavTab, label: 'المستخدمون', icon: Users, roles: ['manager'] },
-    { id: 'audit' as NavTab, label: 'سجل العمليات', icon: ShieldCheck, roles: ['manager', 'coordinator'] },
-    { id: 'settings' as NavTab, label: 'الإعدادات', icon: Settings, roles: ['manager'] },
+  const menuItems = [
+    {
+      id: 'dashboard' as ActiveTab,
+      label: 'لوحة التحكم',
+      icon: LayoutDashboard,
+      badge: null
+    },
+    {
+      id: 'purchases' as ActiveTab,
+      label: 'جدول المشتريات',
+      icon: ShoppingCart,
+      badge: pendingPoCount > 0 ? pendingPoCount : null,
+      badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
+    },
+    {
+      id: 'warehouse' as ActiveTab,
+      label: 'رصيد المستودع الحقيقي',
+      icon: Warehouse,
+      badge: lowStockCount > 0 ? `${lowStockCount} منخفض` : null,
+      badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300'
+    },
+    {
+      id: 'withdrawals' as ActiveTab,
+      label: 'سحوبات الأقسام',
+      icon: ArrowUpRight,
+      badge: null
+    },
+    {
+      id: 'movements' as ActiveTab,
+      label: 'كشف حركات المخزون',
+      icon: History,
+      badge: null
+    },
+    {
+      id: 'recommendations' as ActiveTab,
+      label: 'توصيات الشراء الذكية',
+      icon: Lightbulb,
+      badge: 'ذكاء ERP',
+      badgeColor: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
+    },
+    {
+      id: 'audit' as ActiveTab,
+      label: 'سجل العمليات والأمان',
+      icon: ShieldAlert,
+      badge: null
+    },
+    {
+      id: 'backup' as ActiveTab,
+      label: 'النسخ الاحتياطي والاستعادة',
+      icon: Database,
+      badge: 'JSON',
+      badgeColor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'
+    }
   ];
 
-  const filteredItems = navItems.filter((item) => hasRole(...(item.roles as any)));
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'manager':
-        return { label: 'مدير النظام', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300' };
-      case 'coordinator':
-        return { label: 'منسق عام الإنتاج', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' };
-      case 'hall_manager':
-        return { label: 'مدير صالة النسيج', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300' };
-      default:
-        return { label: 'شاغر وظيفي', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' };
-    }
+  const handleSelectTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
   };
 
-  const roleInfo = user ? getRoleBadge(user.role) : { label: '', color: '' };
-
-  return (
-    <aside
-      className={`fixed top-0 right-0 z-30 h-screen transition-all duration-300 flex flex-col bg-slate-900 text-slate-100 border-l border-slate-800 shadow-xl ${
-        collapsed ? 'w-20' : 'w-72'
-      }`}
-    >
-      {/* Brand Header */}
-      <div className="h-20 flex items-center justify-between px-4 border-b border-slate-800 bg-slate-950/50">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-              <Cpu className="w-6 h-6 animate-pulse" />
-            </div>
-            <div>
-              <h1 className="font-bold text-base text-white tracking-wide leading-tight">نظام ادارة الانتاج</h1>
-              <p className="text-xs text-slate-400 font-medium">إدارة ومراقبة الأنوال</p>
-            </div>
+  const SidebarContent = () => (
+    <>
+      {/* Factory & Warehouse Context Badge */}
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-2">
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-200/60 dark:border-emerald-800/50">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-950 dark:text-emerald-200 mb-1">
+            <Boxes className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>مستودع الغزول الرئيسي</span>
           </div>
-        )}
-        {collapsed && (
-          <div className="mx-auto w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white">
-            <Cpu className="w-6 h-6" />
-          </div>
-        )}
+          <p className="text-[11px] text-emerald-800/80 dark:text-emerald-400/80">
+            إدارة الواردات والأرصدة وسحوبات الصالات
+          </p>
+        </div>
 
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-          title={collapsed ? 'توسيع القائمة' : 'طَي القائمة'}
-        >
-          {collapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-        </button>
+        {/* Switch Module Button in Sidebar */}
+        {onSwitchToProduction && (
+          <button
+            onClick={onSwitchToProduction}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition-all cursor-pointer group"
+            title="التبديل إلى نظام إنتاج النسيج"
+          >
+            <div className="flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+              <span>نظام إنتاج النسيج</span>
+            </div>
+            <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-md">
+              تبديل
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* User Info Bar */}
-      {!collapsed && user && (
-        <div className="p-4 border-b border-slate-800/80 bg-slate-900/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-indigo-300 border border-slate-600">
-            {user.fullName.charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{user.fullName}</p>
-            <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-md mt-0.5 ${roleInfo.color}`}>
-              {roleInfo.label}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
-        {filteredItems.map((item) => {
+      {/* Navigation Links */}
+      <nav className="px-3 py-3 space-y-1 overflow-y-auto flex-1">
+        {menuItems.map(item => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
 
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 group text-right ${
+              onClick={() => handleSelectTab(item.id)}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold shadow-md shadow-indigo-600/30'
-                  : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 font-bold'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
               }`}
-              title={collapsed ? item.label : undefined}
             >
-              <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-400'}`} />
+              <div className="flex items-center gap-3">
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+                <span>{item.label}</span>
+              </div>
 
-              {!collapsed && <span className="text-sm flex-1 truncate">{item.label}</span>}
-
-              {!collapsed && item.badge !== undefined && (
-                <span className={`px-2 py-0.5 text-xs font-bold rounded-full text-white ${item.badgeColor || 'bg-indigo-500'}`}>
+              {item.badge && (
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    isActive ? 'bg-white/20 text-white' : item.badgeColor || 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                  }`}
+                >
                   {item.badge}
                 </span>
-              )}
-
-              {collapsed && item.badge !== undefined && (
-                <span className={`absolute top-1 left-2 w-2.5 h-2.5 rounded-full ${item.badgeColor || 'bg-indigo-500'}`} />
               )}
             </button>
           );
         })}
-      </nav>
 
-      {/* Footer / Logout Button */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/60">
-        <button
-          onClick={logout}
-          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors ${
-            collapsed ? 'justify-center' : ''
-          }`}
-          title="تسجيل الخروج"
-        >
-          <LogOut className="w-5 h-5" />
-          {!collapsed && <span className="text-sm font-medium">تسجيل الخروج</span>}
-        </button>
-      </div>
-    </aside>
+        {/* Developer Credits */}
+        <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
+          <div className="space-y-0.5">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              تم التصميم بواسطة:
+            </p>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              م. حسام بركات
+            </p>
+          </div>
+
+          <a
+            href="https://wa.me/963930379962"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold transition-all shadow-xs group cursor-pointer"
+          >
+            <MessageCircle className="w-3.5 h-3.5 text-white transition-transform group-hover:scale-110" />
+            <span dir="ltr" className="font-mono text-xs tracking-wider">+963930379962</span>
+          </a>
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-300 text-xs font-bold transition-all cursor-pointer mt-1"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>تسجيل الخروج للبوابة</span>
+            </button>
+          )}
+        </div>
+      </nav>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Sticky Sidebar */}
+      <aside className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex-col shrink-0 sticky top-16 h-[calc(100vh-4rem)]">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Drawer Slide-over */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop overlay */}
+          <div 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+          />
+
+          {/* Drawer container */}
+          <aside className="relative w-72 max-w-[85vw] bg-white dark:bg-slate-900 h-full flex flex-col shadow-2xl border-l rtl:border-l-0 rtl:border-r border-slate-200 dark:border-slate-800 z-10 transition-transform">
+            
+            {/* Mobile Drawer Top Bar */}
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold">
+                  <Boxes className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="font-bold text-xs text-slate-900 dark:text-white block">القائمة الرئيسية</span>
+                  <span className="text-[10px] text-slate-500">مستودع الغزول</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="إغلاق القائمة"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+    </>
   );
 };

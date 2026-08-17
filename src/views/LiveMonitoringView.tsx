@@ -4,24 +4,29 @@ import { Loom, Hall, LoomStatus, ProductionOrder, FabricItem } from '../types';
 import { ProductionCalculator } from '../businessLogic/calculators';
 
 interface LiveMonitoringViewProps {
-  looms: Loom[];
-  halls: Hall[];
-  orders: ProductionOrder[];
-  fabrics: FabricItem[];
+  looms?: Loom[];
+  halls?: Hall[];
+  orders?: ProductionOrder[];
+  fabrics?: FabricItem[];
   onRefresh: () => void;
 }
 
 export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
-  looms,
-  halls,
-  orders,
-  fabrics,
+  looms = [],
+  halls = [],
+  orders = [],
+  fabrics = [],
   onRefresh,
 }) => {
+  const safeLooms = looms || [];
+  const safeHalls = halls || [];
+  const safeOrders = orders || [];
+  const safeFabrics = fabrics || [];
+
   const [selectedHall, setSelectedHall] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const filteredLooms = looms.filter((l) => {
+  const filteredLooms = safeLooms.filter((l) => {
     if (selectedHall !== 'all' && l.hallId !== selectedHall) return false;
     if (statusFilter !== 'all' && l.status !== statusFilter) return false;
     return true;
@@ -61,8 +66,8 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
             onChange={(e) => setSelectedHall(e.target.value)}
             className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200"
           >
-            <option value="all">جميع الصالات ({halls.length})</option>
-            {halls.map((h) => (
+            <option value="all">جميع الصالات ({safeHalls.length})</option>
+            {safeHalls.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
@@ -97,8 +102,8 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
           const Icon = stBadge.icon;
 
           // Find active order assigned
-          const activeOrder = orders.find((o) => o.assignedLoomIds?.includes(loom.id) && o.status === 'in_progress');
-          const fabric = fabrics.find((f) => f.id === (activeOrder ? activeOrder.fabricItemId : ''));
+          const activeOrder = safeOrders.find((o) => o.assignedLoomIds?.includes(loom.id) && o.status === 'in_progress');
+          const fabric = safeFabrics.find((f) => f.id === (activeOrder ? activeOrder.fabricItemId : ''));
 
           const expectedDaily = ProductionCalculator.expectedDailyMeters(
             loom.rpm,

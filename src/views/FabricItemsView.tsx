@@ -5,14 +5,29 @@ import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 
 interface FabricItemsViewProps {
-  fabrics: FabricItem[];
+  fabrics?: FabricItem[];
+  searchTerm?: string;
   onRefresh: () => void;
 }
 
-export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRefresh }) => {
+export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics = [], searchTerm = '', onRefresh }) => {
   const { canEditLoom, canDeleteRecords } = useAuth();
+  const safeFabrics = fabrics || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFabric, setEditingFabric] = useState<FabricItem | null>(null);
+
+  const filteredFabrics = safeFabrics.filter((f) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      f.name.toLowerCase().includes(term) ||
+      f.code.toLowerCase().includes(term) ||
+      f.warpYarnCount.toLowerCase().includes(term) ||
+      f.weftYarnCount.toLowerCase().includes(term) ||
+      f.yarnType.toLowerCase().includes(term) ||
+      (f.notes && f.notes.toLowerCase().includes(term))
+    );
+  });
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -252,7 +267,7 @@ export const FabricItemsView: React.FC<FabricItemsViewProps> = ({ fabrics, onRef
 
       {/* Fabric Items Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {fabrics.map((fabric) => {
+        {filteredFabrics.map((fabric) => {
           const totalEndsDisplay = fabric.totalWarpEnds || Math.round(fabric.warpDensity * (fabric.reedWidth || 220));
           return (
             <div
